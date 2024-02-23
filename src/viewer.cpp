@@ -169,19 +169,29 @@ namespace COL781 {
         }
 
 
-        Mesh Mesh::createSqaure(int rows, int columns){
-            Mesh mesh;
+        Mesh* Mesh::createSqaure(int rows, int columns){
+            Mesh* mesh;
             for (int i=0; i<rows; i++){
                 for (int j=0; j<columns; j++){
                     // Add two triangles
                     Face f;
-                    
-                    mesh.triangles.push_back(f);
+
+                    mesh->faces.push_back(f);
                 }
             }
             // connect the faces 
             return mesh;
         }
+
+        Mesh* Mesh::createSphere(int longitudes, int latitudes){
+            Mesh* mesh;
+            return mesh;
+        }
+
+        std::vector<glm::vec4> Mesh::vertices(Mesh mesh){}
+        std::vector<glm::vec4> Mesh::colours(Mesh mesh){}
+        std::vector<glm::ivec3> Mesh::triangles(Mesh mesh){}
+
 
     }
 }

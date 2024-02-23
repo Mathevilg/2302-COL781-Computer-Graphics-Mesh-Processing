@@ -76,7 +76,8 @@ namespace COL781 {
 
         class Vertex {
         public:
-            vec3 position;
+            vec4 position;
+            vec4 colour;
             vec3 normal;
             HalfEdge *halfEdge;
         };
@@ -88,8 +89,12 @@ namespace COL781 {
 
         class Mesh {
         public:
-            Mesh createSqaure(int rows, int columns);
-            std::vector<Face> triangles;
+            Mesh* createSqaure(int rows, int columns);
+            Mesh* createSphere(int longitudes, int latitudes);
+            std::vector<glm::vec4> vertices(Mesh mesh);
+            std::vector<glm::vec4> colours(Mesh mesh);
+            std::vector<glm::ivec3> triangles(Mesh mesh);
+            std::vector<Face> faces;
         };
 
         
