@@ -1,3 +1,8 @@
-# 2302-COL781-Computer-Graphics-Mesh-Processing
-Second course assignment on triangle meshes 
-We implement a data structure to represent a triangle mesh, and use it to perform some basic mesh processing tasks. We can interactively visualize the mesh in 3D, given its vertex data and triangle indices. We work with the mesh data structure itself to create and modify meshes.
+# COL781 Assignment 2: Mesh Processing
+
+Make sure that [glm](https://github.com/g-truc/glm) and [SDL2](https://www.libsdl.org/) are installed. Ideally, these should be installed by your package manager rather than manually (at least, if you are on Linux or Mac).
+
+Then compile the code using the standard CMake procedure:
+
+- The first time, run `cmake -B build` from the project root to create a `build/` directory and initialize a build system there.
+- Then, every time you want to compile the code, run `cmake --build build` (again from the project root). Then the example programs will be created under `build/`.
