@@ -80,6 +80,7 @@ namespace COL781 {
             vec4 colour;
             vec3 normal;
             HalfEdge *halfEdge;
+            void traverseNeighbouringTriangles(Vertex* v);
         };
 
         class Face {
@@ -95,6 +96,12 @@ namespace COL781 {
             std::vector<glm::vec4> colours(Mesh mesh);
             std::vector<glm::ivec3> triangles(Mesh mesh);
             std::vector<Face> faces;
+
+
+
+            // Part 1.3 and 1.4
+            Mesh* loadMesh(std::string filePath); // Parser for part 1.3
+            void recomputeVertexNormals(Mesh* mesh); // recompute normals for part 1.4
         };
 
         

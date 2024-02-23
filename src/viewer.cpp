@@ -168,6 +168,11 @@ namespace COL781 {
             }
         }
 
+        // Part 1.1 and 1.2
+        void traverseNeighbouringTriangles(Vertex* v){
+
+        }
+
 
         Mesh* Mesh::createSqaure(int rows, int columns){
             Mesh* mesh;
@@ -192,6 +197,19 @@ namespace COL781 {
         std::vector<glm::vec4> Mesh::colours(Mesh mesh){}
         std::vector<glm::ivec3> Mesh::triangles(Mesh mesh){}
 
+
+
+        // Parts 1.3 and 1.4
+
+        // Parser for part 1.3
+        Mesh* loadMesh(std::string filePath){
+            Mesh* mesh;
+            return mesh;
+        }
+
+        // recompute normals for part 1.4
+        void recomputeVertexNormals(Mesh* mesh){
+        }
 
     }
 }
