@@ -193,33 +193,45 @@ namespace COL781 {
             return mesh;
         }
 
-        std::vector<glm::vec4> Mesh::getVertices(Mesh mesh){}
-        std::vector<glm::vec4> Mesh::getColours(Mesh mesh){}
-        std::vector<glm::ivec3> Mesh::getTriangles(Mesh mesh){}
+        // std::vector<glm::vec4> Mesh::getVertices(Mesh mesh){return;}
+        // std::vector<glm::vec4> Mesh::getColours(Mesh mesh){return;}
+        // std::vector<glm::ivec3> Mesh::getTriangles(Mesh mesh){return;}
 
 
 
         // Parts 1.3 and 1.4
 
         // Parser for part 1.3
-        Mesh* loadMesh(std::string filePath){
-            Mesh* mesh;
+        Mesh Mesh::loadMesh(std::string filePath){
+            Mesh mesh;
+            std::cout << "fun call\n";
+            std::cout << filePath << "\n";
             std::ifstream inputFile(filePath);
+            std::cout << "fun call\n";
             std::string line;
             int intValue;
-            double doubleValue;
+            // mesh->vertices = {};
+            // mesh->faces = {};
+            // mesh->halfEdges = {};
             // std::vector<Vertex> vertices;
             // std::vector<Face> faces;
+            std::cout << "fun call\n";
             int vertexCount=0;
             int edgeCount = 0;
             int faceCount = 0;
+            int normalCount = 0;
+            // std::map<std::pair<int,int>,int> edgeMap;
             std::map<std::pair<int, int>,int> edgeMap;
+            // std::map<int,int> edgeMap2;
+            std::cout << "while loop start\n";
             while (std::getline(inputFile, line)){
+                std::cout << line << "\n";
                 std::istringstream iss(line);
-                char type;
+                std::string type;
                 iss >> type;
-                switch (type) {
-                    case 'f' :
+                float x,y,z;
+                std::cout << type << "\n";
+                if (type=="f"){
                         // for eavery face, we would have exactly 3 half edges
                         Face f;
                         HalfEdge e1,e2,e3;
@@ -230,33 +242,62 @@ namespace COL781 {
 
                         int i,j,k;
                         iss >> i >> j >> k;
+                        std::cout << i << j << k << "\n";
+                        // std::pair<int,int> p1; p1.first =i; p1.second=j;
+                        // std::string p1 = std::to_string(std::min(i, j)) + " " + std::to_string(std::max(i, j));
+                        // std::string p2 = std::to_string(std::min(i, j)) + " " + std::to_string(std::max(i, j));
+                        // std::string p3 = std::to_string(std::min(i, j)) + " " + std::to_string(std::max(i, j));
+                        std::cout << "heree\n";
+                        // if ((edgeMap1.find(i) != edgeMap1.end()) || (edgeMap2.find(j) != edgeMap2.end())) {std::cout << "here1\n";edgeMap1[i] = e1.index;edgeMap2[j] = e1.index;}
+                        // else { // if found 
+                        //         (mesh.halfEdges)[edgeMap1[i]].halfEdgePair = e1.index;
+                        //         }
+                        // auto it = edgeMap.find(p1);
+                        // std::cout << "it" << "\n";
+                        // auto it1 = edgeMap.end();
+                        // std::cout << "it1\n";
+                        // std::cout << (it==it1) << "\n";
+                        // if (it != it1) {std::cout << "here1\n";(mesh.halfEdges)[edgeMap[p1]].halfEdgePair = e1.index;
+                        //         e1.halfEdgePair = (mesh.halfEdges)[edgeMap[p1]].index;}
+                        //     else { // if found 
+                        //     std::cout << "here2\n";
+                                
+                        //         edgeMap[p1] = e1.index; }
+                            
+                        // if (edgeMap.find(p2) != edgeMap.end()) {std::cout << "here1\n";edgeMap[p1] = e1.index;}
+                        //     else { // if found 
+                        //         (mesh.halfEdges)[edgeMap[p1]].halfEdgePair = e1.index;
+                        //         e1.halfEdgePair = (mesh.halfEdges)[edgeMap[p1]].index;}
+                        // if (edgeMap.find(p1) != edgeMap.end()) {std::cout << "here1\n";edgeMap[p1] = e1.index;}
+                        //     else { // if found 
+                        //         (mesh.halfEdges)[edgeMap[p1]].halfEdgePair = e1.index;
+                        //         e1.halfEdgePair = (mesh.halfEdges)[edgeMap[p1]].index;}
+                        if (edgeMap.find(std::pair<int,int>(std::min(j,i), std::max(j,i))) == edgeMap.end()) edgeMap[std::pair<int,int>(std::min(j,i), std::max(j,i))] = e1.index;
+                            else { // if found 
+                                (mesh.halfEdges)[edgeMap[std::pair<int,int>(std::min(j,i), std::max(j,i))]].halfEdgePair = e1.index;
+                                e1.halfEdgePair = (mesh.halfEdges)[edgeMap[std::pair<int,int>(std::min(j,i), std::max(j,i))]].index;}
+                        // else {if (edgeMap.find(std::pair<int,int>(j,i)) != edgeMap.end()) edgeMap[std::pair<int,int>(j, i)] = e1.index;
+                        //     else { // if found 
+                        //         (mesh.halfEdges)[edgeMap[std::pair<int,int>(j, i)]].halfEdgePair = e1.index;
+                        //         e1.halfEdgePair = (mesh.halfEdges)[edgeMap[std::pair<int,int>(j, i)]].index;}}
 
-                        if (i<j) {if (edgeMap.find(std::pair<int,int>(i,j)) != edgeMap.end()) edgeMap[std::pair<int,int>(i, j)] = e1.index;
+                        if (edgeMap.find(std::pair<int,int>(std::min(j,k), std::max(j,k))) == edgeMap.end()) edgeMap[std::pair<int,int>(std::min(j,k), std::max(j,k))] = e1.index;
                             else { // if found 
-                                (mesh->halfEdges)[edgeMap[std::pair<int,int>(i, j)]].halfEdgePair = e1.index;
-                                e1.halfEdgePair = (mesh->halfEdges)[edgeMap[std::pair<int,int>(i, j)]].index;}}
-                        else {if (edgeMap.find(std::pair<int,int>(j,i)) != edgeMap.end()) edgeMap[std::pair<int,int>(j, i)] = e1.index;
-                            else { // if found 
-                                (mesh->halfEdges)[edgeMap[std::pair<int,int>(j, i)]].halfEdgePair = e1.index;
-                                e1.halfEdgePair = (mesh->halfEdges)[edgeMap[std::pair<int,int>(j, i)]].index;}}
-
-                        if (j<k) {if (edgeMap.find(std::pair<int,int>(j,k)) != edgeMap.end()) edgeMap[std::pair<int,int>(j, k)] = e1.index;
-                            else { // if found 
-                                (mesh->halfEdges)[edgeMap[std::pair<int,int>(j, k)]].halfEdgePair = e1.index;
-                                e1.halfEdgePair = (mesh->halfEdges)[edgeMap[std::pair<int,int>(j, k)]].index;}}
-                        else {if (edgeMap.find(std::pair<int,int>(k,j)) != edgeMap.end()) edgeMap[std::pair<int,int>(k, j)] = e1.index;
-                            else { // if found 
-                                (mesh->halfEdges)[edgeMap[std::pair<int,int>(k, j)]].halfEdgePair = e1.index;
-                                e1.halfEdgePair = (mesh->halfEdges)[edgeMap[std::pair<int,int>(k, j)]].index;}}
+                                (mesh.halfEdges)[edgeMap[std::pair<int,int>(std::min(j,k), std::max(j,k))]].halfEdgePair = e1.index;
+                                e1.halfEdgePair = (mesh.halfEdges)[edgeMap[std::pair<int,int>(std::min(j,k), std::max(j,k))]].index;}
+                        // else {if (edgeMap.find(std::pair<int,int>(k,j)) != edgeMap.end()) edgeMap[std::pair<int,int>(k, j)] = e1.index;
+                        //     else { // if found 
+                        //         (mesh.halfEdges)[edgeMap[std::pair<int,int>(k, j)]].halfEdgePair = e1.index;
+                        //         e1.halfEdgePair = (mesh.halfEdges)[edgeMap[std::pair<int,int>(k, j)]].index;}}
                     
-                        if (k<i) {if (edgeMap.find(std::pair<int,int>(k,i)) != edgeMap.end()) edgeMap[std::pair<int,int>(k, i)] = e1.index;
+                        if (edgeMap.find(std::pair<int,int>(std::min(k,i), std::max(k,i))) == edgeMap.end()) edgeMap[std::pair<int,int>(std::min(i,k), std::max(i,k))] = e1.index;
                             else { // if found 
-                                (mesh->halfEdges)[edgeMap[std::pair<int,int>(k, i)]].halfEdgePair = e1.index;
-                                e1.halfEdgePair = (mesh->halfEdges)[edgeMap[std::pair<int,int>(k, i)]].index;}}
-                        else {if (edgeMap.find(std::pair<int,int>(i,k)) != edgeMap.end()) edgeMap[std::pair<int,int>(i, k)] = e1.index;
-                            else { // if found 
-                                (mesh->halfEdges)[edgeMap[std::pair<int,int>(i, k)]].halfEdgePair = e1.index;
-                                e1.halfEdgePair = (mesh->halfEdges)[edgeMap[std::pair<int,int>(i, k)]].index;}}
+                                (mesh.halfEdges)[edgeMap[std::pair<int,int>(std::min(i,k), std::max(i,k))]].halfEdgePair = e1.index;
+                                e1.halfEdgePair = (mesh.halfEdges)[edgeMap[std::pair<int,int>(std::min(i,k), std::max(i,k))]].index;}
+                        // else {if (edgeMap.find(std::pair<int,int>(i,k)) != edgeMap.end()) edgeMap[std::pair<int,int>(i, k)] = e1.index;
+                        //     else { // if found 
+                        //         (mesh.halfEdges)[edgeMap[std::pair<int,int>(i, k)]].halfEdgePair = e1.index;
+                        //         e1.halfEdgePair = (mesh.halfEdges)[edgeMap[std::pair<int,int>(i, k)]].index;}}
 
                         f.halfEdge = edgeCount;
 
@@ -272,40 +313,57 @@ namespace COL781 {
                         e2.head = k;
                         e3.head = i;
 
-
-
-                        (mesh->faces).push_back(f);
-                        (mesh->halfEdges).push_back(e1);
-                        (mesh->halfEdges).push_back(e2);
-                        (mesh->halfEdges).push_back(e3);
+                        (mesh.faces).push_back(f);
+                        (mesh.halfEdges).push_back(e1);
+                        (mesh.halfEdges).push_back(e2);
+                        (mesh.halfEdges).push_back(e3);
 
                         edgeCount+=3;
                         faceCount++;
                         // ei.halfEdgepair would be set at the end of parsing the complete file
-
+                    }
                     // assuming that the object file contains vn first followed by v.
-                    case 'vn' :
+                    else if (type =="vn"){
                         Vertex v;
-                        float x,y,z;
+                        // float x,y,z;
                         iss >> x >> y >> z;
                         v.normal = glm::vec3(x,y,z);
                         v.index = vertexCount;
-                        (mesh->vertices).push_back(v);
-                    case 'v' :
-                        float x,y,z;
-                        iss >> x >> y >> z;
-                        (mesh->vertices)[vertexCount].position = glm::vec3(x,y,z);
-                        vertexCount++;
-
-                    default : 
+                        mesh.vertices.push_back(v);
+                        normalCount++;
+                    }
+                    // case 'v' :
+                
+                    else if (type == "v"){
+                        // float x,y,z;
+                        std :: cout << "here\n";
+                        if (normalCount==0){
+                            Vertex v;
+                            // float x,y,z;
+                            iss >> x >> y >> z;
+                            std ::cout << x << y << z << "\n";
+                            v.position = glm::vec3(x,y,z);
+                            v.index = vertexCount;
+                            mesh.vertices.push_back(v);
+                            vertexCount++;
+                            std :: cout <<"there\n";
+                        }
+                        else {
+                            iss >> x >> y >> z;
+                            mesh.vertices[vertexCount].position = glm::vec3(x,y,z);
+                            vertexCount++;
+                        }
+                    }
+                    // default : ;
+                std::cout<<"endwhile\n";
                 }
-            }
-
-            return mesh;
+            
+        return mesh;
         }
 
         // recompute normals for part 1.4
         void recomputeVertexNormals(Mesh* mesh){
+            // for (int i=0; i<(mesh->vertices).size(); i++)
         }
 
     }

@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <map>
+#include <string>
 
 namespace COL781 {
     namespace Viewer {
@@ -109,7 +110,7 @@ namespace COL781 {
 
 
             // Part 1.3 and 1.4
-            Mesh* loadMesh(std::string filePath); // Parser for part 1.3
+            Mesh loadMesh(std::string filePath); // Parser for part 1.3
             void recomputeVertexNormals(Mesh* mesh); // recompute normals for part 1.4
         };
 
