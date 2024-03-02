@@ -3,6 +3,8 @@
 
 #include "hw.hpp"
 #include <vector>
+#include <fstream>
+#include <sstream>
 
 namespace COL781 {
     namespace Viewer {
@@ -69,33 +71,36 @@ namespace COL781 {
 
         class HalfEdge {
         public:
-            HalfEdge *pair, *next;
-            Vertex *head;
-            Face *left;
+            int halfEdgePair, halfEdgeNext;
+            int head;
+            int left;
         };
 
         class Vertex {
         public:
-            vec4 position;
-            vec4 colour;
-            vec3 normal;
-            HalfEdge *halfEdge;
+            glm::vec3 position;
+            glm::vec4 colour;
+            glm::vec3 normal;
+            int halfEdge;
             void traverseNeighbouringTriangles(Vertex* v);
         };
 
         class Face {
         public:
-            HalfEdge *halfEdge;
+            int halfEdge;
         };
 
         class Mesh {
         public:
             Mesh* createSqaure(int rows, int columns);
             Mesh* createSphere(int longitudes, int latitudes);
-            std::vector<glm::vec4> vertices(Mesh mesh);
-            std::vector<glm::vec4> colours(Mesh mesh);
-            std::vector<glm::ivec3> triangles(Mesh mesh);
+            std::vector<Vertex> vertices;
             std::vector<Face> faces;
+            std::vector<HalfEdge> halfEdges;
+            std::vector<glm::vec4> getVertices(Mesh mesh);
+            std::vector<glm::vec4> getColours(Mesh mesh);
+            std::vector<glm::ivec3> getTriangles(Mesh mesh);
+            // std::vector<Face> faces;
 
 
 

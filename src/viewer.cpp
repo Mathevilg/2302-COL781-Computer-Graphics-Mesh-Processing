@@ -193,9 +193,9 @@ namespace COL781 {
             return mesh;
         }
 
-        std::vector<glm::vec4> Mesh::vertices(Mesh mesh){}
-        std::vector<glm::vec4> Mesh::colours(Mesh mesh){}
-        std::vector<glm::ivec3> Mesh::triangles(Mesh mesh){}
+        std::vector<glm::vec4> Mesh::getVertices(Mesh mesh){}
+        std::vector<glm::vec4> Mesh::getColours(Mesh mesh){}
+        std::vector<glm::ivec3> Mesh::getTriangles(Mesh mesh){}
 
 
 
@@ -204,6 +204,68 @@ namespace COL781 {
         // Parser for part 1.3
         Mesh* loadMesh(std::string filePath){
             Mesh* mesh;
+            std::ifstream inputFile(filePath);
+            std::string line;
+            int intValue;
+            double doubleValue;
+            // std::vector<Vertex> vertices;
+            // std::vector<Face> faces;
+            int vertexCount=0;
+            int edgeCount = 0;
+            int faceCount = 0;
+            while (std::getline(inputFile, line)){
+                std::istringstream iss(line);
+                char type;
+                iss >> type;
+                switch (type) {
+                    case 'f' :
+                        // for eavery face, we would have exactly 3 half edges
+                        Face f;
+                        HalfEdge e1,e2,e3;
+                        int i,j,k;
+                        iss >> i >> j >> k;
+
+                        f.halfEdge = edgeCount;
+
+                        e1.halfEdgeNext = edgeCount+1;
+                        e2.halfEdgeNext = edgeCount+2;
+                        e3.halfEdgeNext = edgeCount;
+
+                        e1.left = faceCount;
+                        e2.left = faceCount;
+                        e3.left = faceCount;
+
+                        e1.head = j;
+                        e2.head = k;
+                        e3.head = i;
+
+                        (mesh->faces).push_back(f);
+                        (mesh->halfEdges).push_back(e1);
+                        (mesh->halfEdges).push_back(e2);
+                        (mesh->halfEdges).push_back(e3);
+
+                        edgeCount+=3;
+                        faceCount++;
+                        // ei.halfEdgepair would be set at the end of parsing the complete file
+
+                    // assuming that the object file contains vn first followed by v.
+                    case 'vn' :
+                        Vertex v;
+                        float x,y,z;
+                        iss >> x >> y >> z;
+                        v.normal = glm::vec3(x,y,z);
+                        (mesh->vertices).push_back(v);
+                    case 'v' :
+                        float x,y,z;
+                        iss >> x >> y >> z;
+                        (mesh->vertices)[vertexCount].position = glm::vec3(x,y,z);
+                        vertexCount++;
+
+                    default : 
+                }
+            }
+
+
             return mesh;
         }
 
