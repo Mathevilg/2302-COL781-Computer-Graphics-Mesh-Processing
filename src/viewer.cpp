@@ -213,6 +213,7 @@ namespace COL781 {
             int vertexCount=0;
             int edgeCount = 0;
             int faceCount = 0;
+            std::map<std::pair<int, int>,int> edgeMap;
             while (std::getline(inputFile, line)){
                 std::istringstream iss(line);
                 char type;
@@ -222,8 +223,40 @@ namespace COL781 {
                         // for eavery face, we would have exactly 3 half edges
                         Face f;
                         HalfEdge e1,e2,e3;
+                        e1.index = edgeCount;
+                        e2.index = edgeCount+1;
+                        e3.index = edgeCount+2;
+                        f.index = faceCount;
+
                         int i,j,k;
                         iss >> i >> j >> k;
+
+                        if (i<j) {if (edgeMap.find(std::pair<int,int>(i,j)) != edgeMap.end()) edgeMap[std::pair<int,int>(i, j)] = e1.index;
+                            else { // if found 
+                                (mesh->halfEdges)[edgeMap[std::pair<int,int>(i, j)]].halfEdgePair = e1.index;
+                                e1.halfEdgePair = (mesh->halfEdges)[edgeMap[std::pair<int,int>(i, j)]].index;}}
+                        else {if (edgeMap.find(std::pair<int,int>(j,i)) != edgeMap.end()) edgeMap[std::pair<int,int>(j, i)] = e1.index;
+                            else { // if found 
+                                (mesh->halfEdges)[edgeMap[std::pair<int,int>(j, i)]].halfEdgePair = e1.index;
+                                e1.halfEdgePair = (mesh->halfEdges)[edgeMap[std::pair<int,int>(j, i)]].index;}}
+
+                        if (j<k) {if (edgeMap.find(std::pair<int,int>(j,k)) != edgeMap.end()) edgeMap[std::pair<int,int>(j, k)] = e1.index;
+                            else { // if found 
+                                (mesh->halfEdges)[edgeMap[std::pair<int,int>(j, k)]].halfEdgePair = e1.index;
+                                e1.halfEdgePair = (mesh->halfEdges)[edgeMap[std::pair<int,int>(j, k)]].index;}}
+                        else {if (edgeMap.find(std::pair<int,int>(k,j)) != edgeMap.end()) edgeMap[std::pair<int,int>(k, j)] = e1.index;
+                            else { // if found 
+                                (mesh->halfEdges)[edgeMap[std::pair<int,int>(k, j)]].halfEdgePair = e1.index;
+                                e1.halfEdgePair = (mesh->halfEdges)[edgeMap[std::pair<int,int>(k, j)]].index;}}
+                    
+                        if (k<i) {if (edgeMap.find(std::pair<int,int>(k,i)) != edgeMap.end()) edgeMap[std::pair<int,int>(k, i)] = e1.index;
+                            else { // if found 
+                                (mesh->halfEdges)[edgeMap[std::pair<int,int>(k, i)]].halfEdgePair = e1.index;
+                                e1.halfEdgePair = (mesh->halfEdges)[edgeMap[std::pair<int,int>(k, i)]].index;}}
+                        else {if (edgeMap.find(std::pair<int,int>(i,k)) != edgeMap.end()) edgeMap[std::pair<int,int>(i, k)] = e1.index;
+                            else { // if found 
+                                (mesh->halfEdges)[edgeMap[std::pair<int,int>(i, k)]].halfEdgePair = e1.index;
+                                e1.halfEdgePair = (mesh->halfEdges)[edgeMap[std::pair<int,int>(i, k)]].index;}}
 
                         f.halfEdge = edgeCount;
 
@@ -238,6 +271,8 @@ namespace COL781 {
                         e1.head = j;
                         e2.head = k;
                         e3.head = i;
+
+
 
                         (mesh->faces).push_back(f);
                         (mesh->halfEdges).push_back(e1);
@@ -254,6 +289,7 @@ namespace COL781 {
                         float x,y,z;
                         iss >> x >> y >> z;
                         v.normal = glm::vec3(x,y,z);
+                        v.index = vertexCount;
                         (mesh->vertices).push_back(v);
                     case 'v' :
                         float x,y,z;
@@ -264,7 +300,6 @@ namespace COL781 {
                     default : 
                 }
             }
-
 
             return mesh;
         }

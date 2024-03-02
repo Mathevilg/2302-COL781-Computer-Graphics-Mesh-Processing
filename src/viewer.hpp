@@ -5,6 +5,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <map>
 
 namespace COL781 {
     namespace Viewer {
@@ -74,6 +75,7 @@ namespace COL781 {
             int halfEdgePair, halfEdgeNext;
             int head;
             int left;
+            int index;
         };
 
         class Vertex {
@@ -82,12 +84,14 @@ namespace COL781 {
             glm::vec4 colour;
             glm::vec3 normal;
             int halfEdge;
+            int index;
             void traverseNeighbouringTriangles(Vertex* v);
         };
 
         class Face {
         public:
             int halfEdge;
+            int index;
         };
 
         class Mesh {
