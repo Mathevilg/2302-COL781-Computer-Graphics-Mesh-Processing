@@ -8,6 +8,7 @@
 #include <map>
 #include <string>
 
+
 namespace COL781 {
     namespace Viewer {
 
@@ -37,7 +38,6 @@ namespace COL781 {
             void setVertices(int n, const glm::vec3* vertices);
             void setNormals(int n, const glm::vec3* normals);
             void setTriangles(int n, const glm::ivec3* triangles);
-            void createScene(Mesh* mesh);
             void view();
         private:
             COL781::OpenGL::Rasterizer r;
@@ -74,9 +74,10 @@ namespace COL781 {
 
         class HalfEdge {
         public:
-            HalfEdge *pair, *next;
-            Vertex* head;
-            Face* left;
+            int halfEdgePair, halfEdgeNext;
+            int head;
+            int left;
+            int index;
         };
 
         class Vertex {
@@ -84,14 +85,15 @@ namespace COL781 {
             glm::vec3 position;
             glm::vec4 colour;
             glm::vec3 normal;
+            int halfEdge;
             int index;
-            HalfEdge* halfEdge;
             void traverseNeighbouringTriangles(Vertex* v);
         };
 
         class Face {
         public:
-            HalfEdge* halfEdge;
+            int halfEdge;
+            int index;
         };
 
         class Mesh {
@@ -101,11 +103,10 @@ namespace COL781 {
             std::vector<Vertex> vertices;
             std::vector<Face> faces;
             std::vector<HalfEdge> halfEdges;
-            std::vector<glm::vec3> getVertices(Mesh mesh);
-            std::vector<glm::vec3> getNormals(Mesh mesh);
+            std::vector<glm::vec3> positions;
+            std::vector<glm::vec4> getVertices(Mesh mesh);
             std::vector<glm::vec4> getColours(Mesh mesh);
             std::vector<glm::ivec3> getTriangles(Mesh mesh);
-            void createScene(Mesh* mesh);
             // std::vector<Face> faces;
 
 
