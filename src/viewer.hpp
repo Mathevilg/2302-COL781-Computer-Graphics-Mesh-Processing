@@ -104,6 +104,7 @@ namespace COL781 {
             std::vector<Face> faces;
             std::vector<HalfEdge> halfEdges;
             std::vector<glm::vec3> positions;
+            std::vector<glm::vec3> vertexNoramls;
             std::vector<glm::vec4> getVertices(Mesh mesh);
             std::vector<glm::vec4> getColours(Mesh mesh);
             std::vector<glm::ivec3> getTriangles(Mesh mesh);

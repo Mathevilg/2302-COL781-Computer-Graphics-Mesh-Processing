@@ -213,6 +213,7 @@ namespace COL781 {
             int faceCount = 0;
             int normalCount = 0;
             std::map<std::pair<int, int>,int> edgeMap;
+            bool normalsPresent = 0;
             while (std::getline(inputFile, line)){
                 // std::cout << line << "\n";
                 std::istringstream iss(line);
@@ -235,6 +236,11 @@ namespace COL781 {
                     v1.position = mesh.positions[i-1];
                     v2.position = mesh.positions[j-1];
                     v3.position = mesh.positions[k-1];
+                    if (normalsPresent){
+                        v1.normal = mesh.vertexNoramls[i-1];
+                        v2.normal = mesh.vertexNoramls[j-1];
+                        v3.normal = mesh.vertexNoramls[k-1];
+                    }
                         
                     // if (edgeMap.find(std::pair<int,int>(std::min(j,i), std::max(j,i))) == edgeMap.end()) edgeMap[std::pair<int,int>(std::min(j,i), std::max(j,i))] = e1.index;
                     //     else { // if found 
@@ -286,6 +292,8 @@ namespace COL781 {
                     Vertex v;
                     // float x,y,z;
                     iss >> x >> y >> z;
+                    mesh.vertexNoramls.push_back(glm::vec3(x,y,z));
+                    normalsPresent=1;
                     // v.normal = glm::vec3(x,y,z);
                     // v.index = vertexCount;
                     // mesh.vertices.push_back(v);
