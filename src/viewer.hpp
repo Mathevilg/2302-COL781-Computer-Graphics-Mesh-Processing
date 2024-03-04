@@ -115,6 +115,10 @@ namespace COL781 {
             // Part 1.3 and 1.4
             Mesh loadMesh(std::string filePath); // Parser for part 1.3
             void recomputeVertexNormals(Mesh* mesh); // recompute normals for part 1.4
+            
+            // Part 2.1
+            void naiveSmoothing(Mesh* mesh, float lambda, int iter);
+            void taubinSmoothing(Mesh* mesh, float lambda, float mu, int iter);
         };
 
         
