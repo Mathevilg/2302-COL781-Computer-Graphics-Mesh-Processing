@@ -345,22 +345,39 @@ namespace COL781 {
             for (int i=0; i<(mesh->vertices).size(); i++){
                 // for each vertex take the average of normals of each faces
 
-                int curr = (mesh->vertices[i]).halfEdge;
-                int start =  (mesh->vertices[i]).halfEdge;
-                int count = 0;
-                std::cout << start << "\n";
-                while (start != curr || count==0){
-                    std :: cout << count << "\n";
-                    int adj1 = mesh->halfEdges[curr].halfEdgePair;
-                    std::cout << "adj1 " << adj1 << "\n";
-                    glm::vec3 p1 = mesh->vertices[mesh->halfEdges[adj1].head].position;
-                    int adj2 = mesh->halfEdges[adj1].halfEdgeNext;
-                    glm::vec3 p2 = mesh->vertices[mesh->halfEdges[adj2].head].position;
-                    curr = mesh->halfEdges[adj2].halfEdgeNext;
-                    std::cout << count << "\n";
-                    count++;
-                }
-                std::cout << "\n\n";
+                // int curr = (mesh->vertices[i]).halfEdge;
+                // int start =  (mesh->vertices[i]).halfEdge;
+                // int count = 0;
+                // std::cout << start << "\n";
+                // while (start != curr || count==0){
+                //     std :: cout << count << "\n";
+                //     int adj1 = mesh->halfEdges[curr].halfEdgePair;
+                //     std::cout << "adj1 " << adj1 << "\n";
+                //     glm::vec3 p1 = mesh->vertices[mesh->halfEdges[adj1].head].position;
+                //     int adj2 = mesh->halfEdges[adj1].halfEdgeNext;
+                //     glm::vec3 p2 = mesh->vertices[mesh->halfEdges[adj2].head].position;
+                //     curr = mesh->halfEdges[adj2].halfEdgeNext;
+                //     std::cout << count << "\n";
+                //     count++;
+                // }
+                // std::cout << "\n\n";
+
+
+                int he = (mesh->vertices[i]).halfEdge;
+                do {
+                // do something with h->left;
+                    glm::vec3 v1 = mesh->vertices[mesh->halfEdges[he].head].position;
+                    glm::vec3 v2 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].head].position;
+                    glm::vec3 v3 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].halfEdgeNext].head].position;
+                    // std::cout << "v1: " << v1.x << " " << v1.y << " " << v1.z << "\n";
+                    // std::cout << "v2: " << v2.x << " " << v2.y << " " << v2.z << "\n";
+                    // std::cout << "v3: " << v3.x << " " << v3.y << " " << v3.z << "\n";
+                    // std::cout <<"\n";
+                    glm::vec3 n = glm::cross(v1-v2, v1-v3);
+                    mesh->vertices[i].normal = n;
+                    // std::cout << "n: " << n.x << " " << n.y << " " << n.z << "\n";
+                    he = mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].halfEdgePair;  // h = h->next->pair;
+                } while (he != (mesh->vertices[i]).halfEdge);
             }
 
 
