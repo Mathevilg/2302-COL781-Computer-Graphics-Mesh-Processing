@@ -119,6 +119,14 @@ namespace COL781 {
             // Part 2.1
             void naiveSmoothing(Mesh* mesh, float lambda, int iter);
             void taubinSmoothing(Mesh* mesh, float lambda, float mu, int iter);
+
+            // Part 2.2
+            // edge flipping, edge splitting, and edge collapse
+            void flipEdge(Mesh* mesh, int halfEdgeIndex);
+            void splitEdge(Mesh* mesh, int halfEdgeIndex, float ratio);
+            void collapseEdge(Mesh* mesh, int halfEdgeIndex);
+
+            bool testMeshConnectivity(Mesh* mesh);
         };
 
         

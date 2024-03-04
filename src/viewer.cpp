@@ -443,5 +443,14 @@ namespace COL781 {
             }
         }
 
+        // part 2.2 edge flipping, splitting, collapsing, testing mesh connectivity
+        void Mesh::flipEdge(Mesh* mesh, int halfEdgeIndex){
+        }
+        void Mesh::splitEdge(Mesh* mesh, int halfEdgeIndex, float ratio){
+        }
+        void Mesh::collapseEdge(Mesh* mesh, int halfEdgeIndex){
+        }
+        bool Mesh::testMeshConnectivity(Mesh* mesh){return true;}
+
     }
 }
