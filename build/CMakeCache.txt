@@ -249,7 +249,7 @@ a2_SOURCE_DIR:STATIC=/home/tanish/Documents/COL781/a2
 glm_DIR:PATH=/usr/lib/cmake/glm
 
 //Dependencies for the target
-viewer_LIB_DEPENDS:STATIC=general;OpenGL::GL;general;-lSDL2;
+viewer_LIB_DEPENDS:STATIC=general;OpenGL::GL;general;-lSDL2;general;-ldl;
 
 
 ########################
