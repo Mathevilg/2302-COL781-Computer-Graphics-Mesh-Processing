@@ -1,4 +1,4 @@
-/home/mathevil/Desktop/sem-6/a2-main/build/CMakeFiles/viewer.dir
-/home/mathevil/Desktop/sem-6/a2-main/build/CMakeFiles/example.dir
-/home/mathevil/Desktop/sem-6/a2-main/build/CMakeFiles/edit_cache.dir
-/home/mathevil/Desktop/sem-6/a2-main/build/CMakeFiles/rebuild_cache.dir
+/home/tanish/Documents/COL781/a2/build/CMakeFiles/rebuild_cache.dir
+/home/tanish/Documents/COL781/a2/build/CMakeFiles/edit_cache.dir
+/home/tanish/Documents/COL781/a2/build/CMakeFiles/example.dir
+/home/tanish/Documents/COL781/a2/build/CMakeFiles/viewer.dir

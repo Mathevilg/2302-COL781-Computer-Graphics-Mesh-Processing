@@ -1,1 +1,1 @@
-/usr/bin/c++ -rdynamic CMakeFiles/example.dir/src/example.cpp.o -o example  libviewer.a /usr/lib/x86_64-linux-gnu/libGL.so /usr/lib/x86_64-linux-gnu/libSDL2.so 
+/usr/bin/c++    -rdynamic CMakeFiles/example.dir/src/example.cpp.o  -o example  libviewer.a /usr/lib/x86_64-linux-gnu/libGL.so -lSDL2 

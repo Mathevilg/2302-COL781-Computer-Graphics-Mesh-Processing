@@ -22,11 +22,12 @@ int main() {
     };
 
     V::Viewer v;
+    int rows = 5, columns = 5;
+    V::Mesh mesh = V::Mesh::createSquare(rows, columns);
     if (!v.initialize("Mesh viewer", 640, 480)) {
         return EXIT_FAILURE;
     }
-    v.setVertices(4, vertices);
-    v.setNormals(4, normals);
-    v.setTriangles(2, triangles);
+    v.createScene(&mesh);
     v.view();
+    return 0;
 }

@@ -1,2 +1,2 @@
-/usr/bin/ar qc libviewer.a CMakeFiles/viewer.dir/src/hw.cpp.o CMakeFiles/viewer.dir/src/viewer.cpp.o CMakeFiles/viewer.dir/deps/src/gl.c.o
+/usr/bin/ar qc libviewer.a  CMakeFiles/viewer.dir/src/hw.cpp.o CMakeFiles/viewer.dir/src/viewer.cpp.o CMakeFiles/viewer.dir/deps/src/gl.c.o
 /usr/bin/ranlib libviewer.a
