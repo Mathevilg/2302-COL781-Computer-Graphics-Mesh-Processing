@@ -24,7 +24,7 @@ int main() {
     V::Viewer v;
     int rows = 5, columns = 5;
     V::Mesh mesh;
-    mesh = *mesh.createSqaure(rows, columns);
+    mesh = *mesh.createSquare(rows, columns);
     if (!v.initialize("Mesh viewer", 640, 480)) {
         return EXIT_FAILURE;
     }

@@ -98,7 +98,7 @@ namespace COL781 {
 
         class Mesh {
         public:
-            Mesh* createSqaure(int rows, int columns);
+            Mesh* createSquare(int rows, int columns);
             Mesh* createSphere(int longitudes, int latitudes);
             std::vector<Vertex> vertices;
             std::vector<Face> faces;

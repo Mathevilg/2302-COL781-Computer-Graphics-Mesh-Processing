@@ -6,35 +6,3 @@
 
 #IncludeRegexTransform: 
 
-../deps/include/KHR/khrplatform.h
-stdint.h
--
-inttypes.h
--
-stdint.h
--
-
-../deps/include/glad/gl.h
-winapifamily.h
--
-KHR/khrplatform.h
--
-
-/home/tanish/Documents/COL781/a2/deps/src/gl.c
-stdio.h
--
-stdlib.h
--
-string.h
--
-glad/gl.h
--
-stddef.h
--
-stdlib.h
--
-windows.h
--
-dlfcn.h
--
-

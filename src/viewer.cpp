@@ -192,18 +192,21 @@ namespace COL781 {
         }
 
 
-        Mesh* Mesh::createSqaure(int rows, int columns){
-            Mesh* mesh;
+        Mesh* Mesh::createSquare(int rows, int columns){
+            Mesh* mesh = new Mesh();
         
             // Step 1: Initialize vertices
             for (int i = 0; i <= rows; i++) {
                 for (int j = 0; j <= columns; j++) {
-                    Vertex* v;
-                    v->position = glm::vec3((float)j / columns, (float)i / rows, 0.0f);
-                    v->colour = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
-                    v->normal = glm::vec3(0.0f, 0.0f, 1.0f);
-                    v->index = i * (columns + 1) + j;
-                    mesh->vertices.push_back(*v);
+                    Vertex v;
+                    v.position = glm::vec3((float)j / columns, (float)i / rows, 0.0f);
+                    v.colour = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+                    v.normal = glm::vec3(0.0f, 0.0f, 1.0f);
+                    v.index = i * (columns + 1) + j;
+                    // std::cout<<v->index<<std::endl;
+                    
+                    mesh->vertices.push_back(v);
+                    
                 }
             }
 
@@ -212,7 +215,7 @@ namespace COL781 {
                 for (int j = 0; j < columns; j++) {
                     Face upperTriangle;
                     Face lowerTriangle;
-                    HalfEdge e1, e2, e3, e4, e5, e6,e7,e8;
+                    HalfEdge e1, e2, e3, e4, e5, e6;
                     Vertex v1, v2, v3, v4;
                     v1 = mesh->vertices[i * (columns + 1) + j];
                     v2 = mesh->vertices[i * (columns + 1) + j + 1];
@@ -259,35 +262,6 @@ namespace COL781 {
                     mesh->halfEdges.push_back(e5);
                     mesh->halfEdges.push_back(e6);
 
-                    // if(i==0){
-                    //  e7.head = v2.index;
-                    //  e7.head = i * (columns + 1) + j + 1;
-                    //  e7.pair = e2.index;
-                    //  e2.pair = e7.index; 
-                    //  mesh->halfEdges.push_back(e7);
-                    // }
-                    // if(i==rows-1){
-                    //  e7.head = v4;
-                    //  e7.head = (i + 1) * (columns + 1) + j;
-                    //  e7.pair = e5;
-                    //  e5.pair = e7;
-                    //  mesh->halfEdges.push_back(e7);
-                    // } 
-                    // if(j==0){
-                    //  e8.head = v1;
-                    //  e8.head = i * (columns + 1) + j;
-                    //  e8.pair = e3; 
-                    //  e3.pair = e8; 
-                    //  mesh->halfEdges.push_back(e8);
-                    // }
-                    // if(j==columns-1){
-                    //  e8.head = v3;
-                    //  e8.head = (i + 1) * (columns + 1) + j + 1;
-                    //  e8.pair = e6;
-                    //  e6.pair = e8; 
-                    //  mesh->halfEdges.push_back(e8);
-                    // }
-
                     if(i!=0 && j!=0){
                         HalfEdge prevUp = mesh->halfEdges[mesh->halfEdges[mesh->faces[2*((i-1)*columns + j) + 1].halfEdge].halfEdgeNext];
                         HalfEdge prevLeft = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->faces[2*(i*columns + j) - 1].halfEdge].halfEdgeNext].halfEdgeNext];
@@ -315,7 +289,7 @@ namespace COL781 {
         }
 
         Mesh* Mesh::createSphere(int longitudes, int latitudes){
-            Mesh* mesh;
+            Mesh* mesh = new Mesh();
 
             // Step 1: Initialize vertices
             // for (int i = 1; i < latitudes; i++) {
