@@ -87,7 +87,7 @@ namespace COL781 {
             glm::vec3 normal;
             int halfEdge;
             int index;
-            void traverseNeighbouringTriangles(Vertex* v);
+            void traverseNeighbouringTriangles(std::vector<HalfEdge> &halfEdges, Vertex* v);
         };
 
         class Face {
@@ -102,12 +102,14 @@ namespace COL781 {
             Mesh* createSphere(int longitudes, int latitudes);
             std::vector<Vertex> vertices;
             std::vector<Face> faces;
-            std::vector<HalfEdge> halfEdges;
+            std::vector<glm::vec3> vertexNormals;
             std::vector<glm::vec3> positions;
-            std::vector<glm::vec3> vertexNoramls;
-            std::vector<glm::vec4> getVertices(Mesh mesh);
-            std::vector<glm::vec4> getColours(Mesh mesh);
-            std::vector<glm::ivec3> getTriangles(Mesh mesh);
+            std::vector<HalfEdge> halfEdges;
+            std::vector<glm::vec3> getVertices(Mesh* mesh);
+            std::vector<glm::vec3> getNormals(Mesh* mesh);
+            std::vector<glm::vec4> getColours(Mesh* mesh);
+            std::vector<glm::ivec3> getTriangles(Mesh* mesh);
+            void createScene(Viewer* viewer);
             // std::vector<Face> faces;
 
 

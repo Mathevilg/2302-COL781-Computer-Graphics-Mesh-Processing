@@ -169,35 +169,363 @@ namespace COL781 {
         }
 
         // Part 1.1 and 1.2
-        void traverseNeighbouringTriangles(Vertex* v){
+        
 
+        void Vertex::traverseNeighbouringTriangles(std::vector<HalfEdge> &halfEdges, Vertex* v){
+            HalfEdge h = halfEdges[v->halfEdge];
+            do {
+                // do something with h->left;
+                h = halfEdges[halfEdges[h.halfEdgeNext].halfEdgePair];
+            }
+            while (h.index != halfEdges[v->halfEdge].index);
+        }
+
+        void Mesh::createScene(Viewer* viewer){   
+            std::vector<glm::vec3> vertices = this->getVertices(this);
+            std::vector<glm::vec3> normals = this->getNormals(this);
+            std::vector<glm::vec4> colours = this->getColours(this);
+            std::vector<glm::ivec3> triangles = this->getTriangles(this);
+
+            viewer->setVertices(vertices.size(), vertices.data());
+            viewer->setNormals(normals.size(), normals.data());
+            viewer->setTriangles(triangles.size(), triangles.data());
         }
 
 
         Mesh* Mesh::createSqaure(int rows, int columns){
             Mesh* mesh;
-            for (int i=0; i<rows; i++){
-                for (int j=0; j<columns; j++){
-                    // Add two triangles
-                    Face f;
-
-                    mesh->faces.push_back(f);
+        
+            // Step 1: Initialize vertices
+            for (int i = 0; i <= rows; i++) {
+                for (int j = 0; j <= columns; j++) {
+                    Vertex* v;
+                    v->position = glm::vec3((float)j / columns, (float)i / rows, 0.0f);
+                    v->colour = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+                    v->normal = glm::vec3(0.0f, 0.0f, 1.0f);
+                    v->index = i * (columns + 1) + j;
+                    mesh->vertices.push_back(*v);
                 }
             }
-            // connect the faces 
+
+            // Step 2: Initialize triangles
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < columns; j++) {
+                    Face upperTriangle;
+                    Face lowerTriangle;
+                    HalfEdge e1, e2, e3, e4, e5, e6,e7,e8;
+                    Vertex v1, v2, v3, v4;
+                    v1 = mesh->vertices[i * (columns + 1) + j];
+                    v2 = mesh->vertices[i * (columns + 1) + j + 1];
+                    v3 = mesh->vertices[(i + 1) * (columns + 1) + j + 1];
+                    v4 = mesh->vertices[(i + 1) * (columns + 1) + j];
+
+                    int start_index = mesh->halfEdges.size();
+                    e1.head = v2.index; e1.index = start_index;
+                    e2.head = v1.index; e2.index = start_index + 1;
+                    e3.head = v4.index; e3.index = start_index + 2;
+                    e4.head = v4.index; e4.index = start_index + 3;
+                    e5.head = v3.index; e5.index = start_index + 4;
+                    e6.head = v2.index; e6.index = start_index + 5;
+
+                    if(i==0){
+                        v1.halfEdge = e2.index;
+                    }
+                    if(j==columns-1){
+                        v2.halfEdge = e6.index;
+                    }
+                    v4.halfEdge = e3.index;
+                    if(i==rows-1 && j==columns-1){
+                        v3.halfEdge = e5.index;
+                    }
+
+                    upperTriangle.index = 2*(i*columns + j);
+                    lowerTriangle.index = 2*(i*columns + j) + 1;
+                    upperTriangle.halfEdge = e1.index;
+                    lowerTriangle.halfEdge = e4.index;
+
+                    e1.left = upperTriangle.index; e1.halfEdgeNext = e2.index;
+                    e2.left = upperTriangle.index; e2.halfEdgeNext = e3.index;
+                    e3.left = upperTriangle.index; e3.halfEdgeNext = e1.index;
+                    e4.left = lowerTriangle.index; e4.halfEdgeNext = e5.index;
+                    e5.left = lowerTriangle.index; e5.halfEdgeNext = e6.index;
+                    e6.left = lowerTriangle.index; e6.halfEdgeNext = e4.index;
+                    e4.halfEdgePair = e1.index;
+                    e1.halfEdgePair = e4.index;
+
+                    mesh->halfEdges.push_back(e1);
+                    mesh->halfEdges.push_back(e2);
+                    mesh->halfEdges.push_back(e3);
+                    mesh->halfEdges.push_back(e4);
+                    mesh->halfEdges.push_back(e5);
+                    mesh->halfEdges.push_back(e6);
+
+                    // if(i==0){
+                    //  e7.head = v2.index;
+                    //  e7.head = i * (columns + 1) + j + 1;
+                    //  e7.pair = e2.index;
+                    //  e2.pair = e7.index; 
+                    //  mesh->halfEdges.push_back(e7);
+                    // }
+                    // if(i==rows-1){
+                    //  e7.head = v4;
+                    //  e7.head = (i + 1) * (columns + 1) + j;
+                    //  e7.pair = e5;
+                    //  e5.pair = e7;
+                    //  mesh->halfEdges.push_back(e7);
+                    // } 
+                    // if(j==0){
+                    //  e8.head = v1;
+                    //  e8.head = i * (columns + 1) + j;
+                    //  e8.pair = e3; 
+                    //  e3.pair = e8; 
+                    //  mesh->halfEdges.push_back(e8);
+                    // }
+                    // if(j==columns-1){
+                    //  e8.head = v3;
+                    //  e8.head = (i + 1) * (columns + 1) + j + 1;
+                    //  e8.pair = e6;
+                    //  e6.pair = e8; 
+                    //  mesh->halfEdges.push_back(e8);
+                    // }
+
+                    if(i!=0 && j!=0){
+                        HalfEdge prevUp = mesh->halfEdges[mesh->halfEdges[mesh->faces[2*((i-1)*columns + j) + 1].halfEdge].halfEdgeNext];
+                        HalfEdge prevLeft = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->faces[2*(i*columns + j) - 1].halfEdge].halfEdgeNext].halfEdgeNext];
+                        e2.halfEdgePair = prevUp.index;
+                        prevUp.halfEdgePair = e2.index;
+                        e3.halfEdgePair = prevLeft.index;
+                        prevLeft.halfEdgePair = e3.index;
+                    }
+                    else if(i!=0){
+                        HalfEdge prevUp = mesh->halfEdges[mesh->halfEdges[mesh->faces[2*((i-1)*columns + j) + 1].halfEdge].halfEdgeNext];
+                        e2.halfEdgePair = prevUp.index;
+                        prevUp.halfEdgePair = e2.index;
+                    }
+                    else if(j!=0){
+                        HalfEdge prevLeft = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->faces[2*(i*columns + j) - 1].halfEdge].halfEdgeNext].halfEdgeNext];
+                        e3.halfEdgePair = prevLeft.index;
+                        prevLeft.halfEdgePair = e3.index;
+                    }
+                    mesh->faces.push_back(upperTriangle);
+                    mesh->faces.push_back(lowerTriangle);
+                    
+                }
+            }
             return mesh;
         }
 
         Mesh* Mesh::createSphere(int longitudes, int latitudes){
             Mesh* mesh;
+
+            // Step 1: Initialize vertices
+            // for (int i = 1; i < latitudes; i++) {
+            //     for (int j = 0; j < longitudes; j++) {
+            //         float theta = static_cast<float>(j) / longitudes * glm::two_pi<float>();
+            //         float phi = static_cast<float>(i) / latitudes * glm::pi<float>();
+        
+            //         Vertex* v;
+            //         v.position = glm::vec3(std::sin(phi) * std::cos(theta), std::sin(phi) * std::sin(theta), std::cos(phi));        
+            //         v->colour = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+            //         v->normal = glm::normalize(v->position);
+            //         v.index = (i-1) * longitudes + j;
+            //         mesh->vertices.push_back(v);
+            //     }
+            // }
+            // Vertex *northPole, *southPole;
+            // northPole.position = glm::vec3(0.0f, 0.0f, 1.0f); southPole.position = glm::vec3(0.0f, 0.0f, -1.0f);
+            // northPole.colour = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f); southPole.colour = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+            // northPole.normal = glm::vec3(0.0f, 0.0f, 1.0f); southPole.normal = glm::vec3(0.0f, 0.0f, -1.0f);
+            // mesh->vertices.push_back(northPole); mesh->vertices.push_back(southPole);
+            // northPole.index = (latitudes-1) * longitudes; southPole.index = (latitudes-1) * longitudes + 1;
+            
+
+            // // Step 2: Initialize triangles
+            // for (int i = 0; i < latitudes-2; i++) {
+            //     for (int j = 0; j < longitudes; j++) {
+            //         Face* upperTriangle;
+            //         Face* lowerTriangle;
+        
+            //         HalfEdge e1, e2, e3, e4, e5, e6;
+        
+            //         Vertex* v1 = mesh->vertices[i * (longitudes) + j];
+            //         Vertex* v2 = mesh->vertices[i * (longitudes) + (j + 1)%longitudes];
+            //         Vertex* v3 = mesh->vertices[(i + 1) * (longitudes) + (j + 1)%longitudes];
+            //         Vertex* v4 = mesh->vertices[(i + 1) * (longitudes) + j];
+        
+            //         e1.head_vertex = v2;
+            //         e2.head_vertex = v1;
+            //         e3.head_vertex = v4;
+            //         e4.head_vertex = v4;
+            //         e5.head_vertex = v3;
+            //         e6.head_vertex = v2;
+                    
+
+            //         upperTriangle->halfEdge = e1;
+            //         lowerTriangle->halfEdge = e4;
+        
+            //         e1.left = upperTriangle; e2.left = upperTriangle; e3.left = upperTriangle;
+            //         e4.left = lowerTriangle; e5.left = lowerTriangle; e6.left = lowerTriangle;
+        
+            //         e4.pair = &e1;
+            //         e1.pair = &e4;
+        
+            //         mesh->halfEdges.push_back(e1);
+            //         mesh->halfEdges.push_back(e2);
+            //         mesh->halfEdges.push_back(e3);
+            //         mesh->halfEdges.push_back(e4);
+            //         mesh->halfEdges.push_back(e5);
+            //         mesh->halfEdges.push_back(e6);
+        
+            //         if (i == 0) {
+            //             HalfEdge e7;
+            //             e7.head_vertex = v2;
+            //             e7.head = i * (longitudes + 1) + j + 1;
+            //             e7.pair = e2;
+            //             e2.pair = e7;
+            //             mesh->halfEdges.push_back(e7);
+            //         }
+        
+            //         if (i == latitudes - 1) {
+            //             HalfEdge e7;
+            //             e7.head_vertex = v4;
+            //             e7.head = (i + 1) * (longitudes + 1) + j;
+            //             e7.pair = e5;
+            //             e5.pair = e7;
+            //             mesh->halfEdges.push_back(e7);
+            //         }
+        
+            //         if (i != 0 && j!=0) {
+            //             HalfEdge* prevUp = mesh.faces[2 * ((i - 1) * longitudes + j) + 1].halfEdge->next;
+            //             HalfEdge* prevLeft = mesh.faces[2 * (i * longitudes + j) - 1].halfEdge->next->next;
+            //             e2.pair = prevUp;
+            //             prevUp.pair = e2;
+            //             e3.pair = prevLeft;
+            //             prevLeft.pair = e3;
+            //             if(j==longitudes-1){
+            //                 HalfEdge* Right = mesh.faces[2 * ((i -1)* longitudes + j + 1) ].halfEdge->next->next;
+            //                 e6.pair = Right;
+            //                 Right.pair = e6;
+            //             }
+            //         }
+            //         else if (j != 0) {
+            //             HalfEdge* prevLeft = mesh.faces[2 * (i * longitudes + j) - 1].halfEdge->next->next;
+            //             e3.pair = prevLeft;
+            //             prevLeft.pair = e3;
+            //             if(j==longitudes-1){
+            //                 HalfEdge* Right = mesh.faces[2 * ((i -1)* longitudes + j + 1) ].halfEdge->next->next;
+            //                 e6.pair = Right;
+            //                 Right.pair = e6;
+            //             }
+            //         }
+            //         if (i != 0) {
+            //             HalfEdge* prevUp = mesh.faces[2 * ((i - 1) * longitudes + j) + 1].halfEdge->next;
+            //             e2.pair = prevUp;
+            //             prevUp.pair = e2;
+            //         }
+        
+        
+            //         mesh->faces.push_back(upperTriangle);
+            //         mesh->faces.push_back(lowerTriangle);
+            //     }
+
+
+            // }
+
+            // for(int j =0; j<longitudes; j++){
+            //     Face* topTriangle;
+            //     Face* bottomTriangle;
+            //     HalfEdge e1, e2, e3, e4, e5, e6;
+            //     Vertex* v1 = mesh->vertices[j];
+            //     Vertex* v2 = mesh->vertices[(j + 1)%longitudes];
+            //     Vertex* v3 = mesh->vertices[(latitudes - 2) * (longitudes) + j];
+            //     Vertex* v4 = mesh->vertices[(latitudes - 2) * (longitudes) + (j + 1)%longitudes];
+
+            //     e1.head_vertex = northPole;
+            //     e2.head_vertex = v1;
+            //     e3.head_vertex = v2;
+            //     e4.head_vertex = southPole;
+            //     e5.head_vertex = v4;
+            //     e6.head_vertex = v3;
+
+            //     topTriangle->halfEdge = e3;
+            //     bottomTriangle->halfEdge = e6;
+
+            //     e1.left = topTriangle; e2.left = topTriangle; e3.left = topTriangle;
+            //     e4.left = bottomTriangle; e5.left = bottomTriangle; e6.left = bottomTriangle;
+
+            //     mesh.halfEdges.push_back(e1);
+            //     mesh.halfEdges.push_back(e2);
+            //     mesh.halfEdges.push_back(e3);
+            //     mesh.halfEdges.push_back(e4);
+            //     mesh.halfEdges.push_back(e5);
+            //     mesh.halfEdges.push_back(e6);
+
+            //     HalfEdge* prevDown = mesh.faces[2*j].halfEdge->next;
+            //     e3.pair = prevDown;
+            //     prevDown.pair = e3;
+
+            //     HalfEdge* prevUp = mesh.faces[2*(latitudes-3)*longitudes + 2*j + 1].halfEdge->next;
+            //     e6.pair = prevUp;
+            //     prevUp.pair = e6;
+
+            //     if(j!=0){
+            //         HalfEdge* prevLeftTop = mesh.faces[2*(latitudes-2)*longitudes + 2*j - 2].halfEdge->next;
+            //         e2.pair = prevLeftTop;
+            //         prevLeftTop.pair = e2;
+            //         HalfEdge* prevLeftBottom = mesh.faces[2*(latitudes-2)*longitudes + 2*j - 1].halfEdge->next->next;
+            //         e4.pair = prevLeftBottom;
+            //         prevLeftBottom.pair = e4;
+            //         if(j==longitudes-1){
+            //             Halfedge *prevRightTop = mesh.faces[2*(latitudes-2)*longitudes].halfEdge->next->next;
+            //             e1.pair = prevRightTop;
+            //             prevRightTop.pair = e1;
+            //             HalfEdge *prevRightBottom = mesh.faces[2*(latitudes-2)*longitudes + 1].halfEdge->next;
+            //             e5.pair = prevRightBottom;
+            //             prevRightBottom.pair = e5; 
+            //         } 
+            //     }
+
+            //     mesh->faces.push_back(topTriangle);
+            //     mesh->faces.push_back(bottomTriangle);
+            // }
+            
             return mesh;
         }
 
-        // std::vector<glm::vec4> Mesh::getVertices(Mesh mesh){return;}
-        // std::vector<glm::vec4> Mesh::getColours(Mesh mesh){return;}
-        // std::vector<glm::ivec3> Mesh::getTriangles(Mesh mesh){return;}
+        std::vector<glm::vec3> Mesh::getVertices(Mesh* mesh){
+            std::vector<glm::vec3> vertices;
 
+            // for(auto vertex : mesh.vertices){
+            //     vertices.push_back(vertex.position);
+            // }
+            return vertices;
+        }
+        std::vector<glm::vec3> Mesh::getNormals(Mesh* mesh){
+            std::vector<glm::vec3> vertices;
 
+            // for(auto vertex : mesh.vertices){
+            //     vertices.push_back(vertex.normal);
+            // }
+            return vertices;
+        }
+        std::vector<glm::vec4> Mesh::getColours(Mesh* mesh){
+            std::vector<glm::vec4> colours;
+
+            // for(auto vertex : mesh.vertices){
+            //     colours.push_back(vertex.colour);
+            // }
+            return colours;
+        }
+        std::vector<glm::ivec3> Mesh::getTriangles(Mesh* mesh){
+            std::vector<glm::ivec3> triangles;
+
+            // for(auto face : mesh.faces){
+            //     int index = mesh.halfEdges[face.halfEdge].head;
+            //     triangles.push_back(glm::ivec3(index, index+1, index+2));
+            // }
+            return triangles;
+        }
+        
 
         // Parts 1.3 and 1.4
 
@@ -237,9 +565,9 @@ namespace COL781 {
                     v2.position = mesh.positions[j-1];
                     v3.position = mesh.positions[k-1];
                     if (normalsPresent){
-                        v1.normal = mesh.vertexNoramls[i-1];
-                        v2.normal = mesh.vertexNoramls[j-1];
-                        v3.normal = mesh.vertexNoramls[k-1];
+                        v1.normal = mesh.vertexNormals[i-1];
+                        v2.normal = mesh.vertexNormals[j-1];
+                        v3.normal = mesh.vertexNormals[k-1];
                     }
                         
                     // if (edgeMap.find(std::pair<int,int>(std::min(j,i), std::max(j,i))) == edgeMap.end()) edgeMap[std::pair<int,int>(std::min(j,i), std::max(j,i))] = e1.index;
@@ -292,7 +620,7 @@ namespace COL781 {
                     Vertex v;
                     // float x,y,z;
                     iss >> x >> y >> z;
-                    mesh.vertexNoramls.push_back(glm::vec3(x,y,z));
+                    mesh.vertexNormals.push_back(glm::vec3(x,y,z));
                     normalsPresent=1;
                     // v.normal = glm::vec3(x,y,z);
                     // v.index = vertexCount;
