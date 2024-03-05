@@ -24,13 +24,16 @@ int main() {
     V::Viewer v;
     int rows = 5, columns = 5;
     V::Mesh mesh;
-    mesh = *mesh.createSquare(rows, columns);
-    // mesh = *mesh.createSphere(100,100);
+    // mesh = *mesh.createSquare(rows, columns);
+    mesh = *mesh.createSphere(50,50);
     if (!v.initialize("Mesh viewer", 640, 480)) {
         return EXIT_FAILURE;
     }
-    // mesh.loopSubdivision(&mesh,1);
-    mesh.flipEdge(&mesh, 2);
+    
+        // mesh.loopSubdivision(&mesh, 30);
+   
+    // mesh.flipEdge(&mesh, 119);
+    
     mesh.createScene(&v);
     v.view();
     return 0;

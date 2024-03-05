@@ -254,35 +254,36 @@ namespace COL781 {
                     e4.halfEdgePair = e1.index;
                     e1.halfEdgePair = e4.index;
 
+
+                    if(i!=0 && j!=0){
+                        Face upFace = mesh->faces[lowerTriangle.index-2*columns];
+                        Face leftFace = mesh->faces[upperTriangle.index - 1];
+                        HalfEdge prevUp = mesh->halfEdges[mesh->halfEdges[upFace.halfEdge].halfEdgeNext];
+                        HalfEdge prevLeft = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[leftFace.halfEdge].halfEdgeNext].halfEdgeNext];
+                        e2.halfEdgePair = prevUp.index;
+                        mesh->halfEdges[prevUp.index].halfEdgePair = e2.index;
+                        e3.halfEdgePair = prevLeft.index;
+                        mesh->halfEdges[prevLeft.index].halfEdgePair = e3.index;
+                    }
+                    else if(i!=0){
+                        Face upFace = mesh->faces[lowerTriangle.index-2*columns];
+                        HalfEdge prevUp = mesh->halfEdges[mesh->halfEdges[upFace.halfEdge].halfEdgeNext];
+                        e2.halfEdgePair = prevUp.index;
+                        mesh->halfEdges[prevUp.index].halfEdgePair = e2.index;
+                    }
+                    else if(j!=0){
+                        Face leftFace = mesh->faces[upperTriangle.index - 1];
+                        HalfEdge prevLeft = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[leftFace.halfEdge].halfEdgeNext].halfEdgeNext];
+                        e3.halfEdgePair = prevLeft.index;
+                        mesh->halfEdges[prevLeft.index].halfEdgePair = e3.index;
+                    }
+
                     mesh->halfEdges.push_back(e1); mesh->vertices.push_back(v1);
                     mesh->halfEdges.push_back(e2); mesh->vertices.push_back(v2);
                     mesh->halfEdges.push_back(e3); mesh->vertices.push_back(v3);
                     mesh->halfEdges.push_back(e4); mesh->vertices.push_back(v4);
                     mesh->halfEdges.push_back(e5); mesh->vertices.push_back(v5);
                     mesh->halfEdges.push_back(e6); mesh->vertices.push_back(v6);
-
-                    if(i!=0 && j!=0){
-                        Face upFace = mesh->faces[2*((i-1)*columns + j+1)];
-                        Face leftFace = mesh->faces[2*(i*columns + j) - 1];
-                        HalfEdge prevUp = mesh->halfEdges[mesh->halfEdges[upFace.halfEdge].halfEdgeNext];
-                        HalfEdge prevLeft = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[leftFace.halfEdge].halfEdgeNext].halfEdgeNext];
-                        e2.halfEdgePair = prevUp.index;
-                        prevUp.halfEdgePair = e2.index;
-                        e3.halfEdgePair = prevLeft.index;
-                        prevLeft.halfEdgePair = e3.index;
-                    }
-                    else if(i!=0){
-                        Face upFace = mesh->faces[2*((i-1)*columns + j+1)];
-                        HalfEdge prevUp = mesh->halfEdges[mesh->halfEdges[upFace.halfEdge].halfEdgeNext];
-                        e2.halfEdgePair = prevUp.index;
-                        prevUp.halfEdgePair = e2.index;
-                    }
-                    else if(j!=0){
-                        Face leftFace = mesh->faces[2*(i*columns + j) - 1];
-                        HalfEdge prevLeft = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[leftFace.halfEdge].halfEdgeNext].halfEdgeNext];
-                        e3.halfEdgePair = prevLeft.index;
-                        prevLeft.halfEdgePair = e3.index;
-                    }
                     mesh->faces.push_back(upperTriangle);
                     mesh->faces.push_back(lowerTriangle);
                     
@@ -294,6 +295,7 @@ namespace COL781 {
         float theta(int j, int longitudes){
             return static_cast<float>((j%longitudes)) / longitudes * glm::two_pi<float>();
         }
+
         float phi(int i, int latitudes){
             return static_cast<float>(i) / latitudes * glm::pi<float>();
         }
@@ -353,12 +355,6 @@ namespace COL781 {
                     e4.halfEdgePair = e1.index;
                     e1.halfEdgePair = e4.index;
         
-                    mesh->halfEdges.push_back(e1); mesh->vertices.push_back(v1);
-                    mesh->halfEdges.push_back(e2); mesh->vertices.push_back(v2);
-                    mesh->halfEdges.push_back(e3); mesh->vertices.push_back(v3);
-                    mesh->halfEdges.push_back(e4); mesh->vertices.push_back(v4);
-                    mesh->halfEdges.push_back(e5); mesh->vertices.push_back(v5);
-                    mesh->halfEdges.push_back(e6); mesh->vertices.push_back(v6);
         
         
                     if (i != 1 && j!=0) {
@@ -367,36 +363,43 @@ namespace COL781 {
                         HalfEdge prevUp = mesh->halfEdges[mesh->halfEdges[upFace.halfEdge].halfEdgeNext];
                         HalfEdge prevLeft = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[leftFace.halfEdge].halfEdgeNext].halfEdgeNext];
                         e2.halfEdgePair = prevUp.index;
-                        prevUp.halfEdgePair = e2.index;
+                        mesh->halfEdges[prevUp.index].halfEdgePair = e2.index;
                         e3.halfEdgePair = prevLeft.index;
-                        prevLeft.halfEdgePair = e3.index;
+                        mesh->halfEdges[prevLeft.index].halfEdgePair = e3.index;
                         if(j==longitudes-1){
-                            Face rightFace = mesh->faces[upperTriangle.index - 2*longitudes];
+                            Face rightFace = mesh->faces[upperTriangle.index - 2*(longitudes-1)];
                             HalfEdge Right = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[rightFace.halfEdge].halfEdgeNext].halfEdgeNext];
                             e6.halfEdgePair = Right.index;
-                            Right.halfEdgePair = e6.index;
+                            mesh->halfEdges[Right.index].halfEdgePair = e6.index;
                         }
                     }
                     else if (j != 0) {
                         Face leftFace = mesh->faces[upperTriangle.index - 1];
                         HalfEdge prevLeft = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[leftFace.halfEdge].halfEdgeNext].halfEdgeNext];
                         e3.halfEdgePair = prevLeft.index;
-                        prevLeft.halfEdgePair = e3.index;
+                        mesh->halfEdges[prevLeft.index].halfEdgePair = e3.index;
                         if(j==longitudes-1){
-                            Face rightFace = mesh->faces[2*((i-1)*longitudes)];
+                            
+                            Face rightFace = mesh->faces[upperTriangle.index - 2*(longitudes-1)];
                             HalfEdge Right = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[rightFace.halfEdge].halfEdgeNext].halfEdgeNext];
                             e6.halfEdgePair = Right.index;
-                            Right.halfEdgePair = e6.index;
+                            mesh->halfEdges[Right.index].halfEdgePair = e6.index;
                         }
                     }
-                    if (i != 1) {
+                    else if (i != 1) {
                         Face upFace = mesh->faces[lowerTriangle.index - 2*longitudes];
                         HalfEdge prevUp = mesh->halfEdges[mesh->halfEdges[upFace.halfEdge].halfEdgeNext];
                         e2.halfEdgePair = prevUp.index;
-                        prevUp.halfEdgePair = e2.index;
+                        mesh->halfEdges[prevUp.index].halfEdgePair = e2.index;
                     }
         
         
+                    mesh->halfEdges.push_back(e1); mesh->vertices.push_back(v1);
+                    mesh->halfEdges.push_back(e2); mesh->vertices.push_back(v2);
+                    mesh->halfEdges.push_back(e3); mesh->vertices.push_back(v3);
+                    mesh->halfEdges.push_back(e4); mesh->vertices.push_back(v4);
+                    mesh->halfEdges.push_back(e5); mesh->vertices.push_back(v5);
+                    mesh->halfEdges.push_back(e6); mesh->vertices.push_back(v6);
                     mesh->faces.push_back(upperTriangle);
                     mesh->faces.push_back(lowerTriangle);
                 }
@@ -445,12 +448,6 @@ namespace COL781 {
                 e5.left = bottomTriangle.index; e5.halfEdgeNext = e6.index;
                 e6.left = bottomTriangle.index; e6.halfEdgeNext = e4.index;
 
-                mesh->halfEdges.push_back(e1); mesh->vertices.push_back(v1);
-                mesh->halfEdges.push_back(e2); mesh->vertices.push_back(v2);
-                mesh->halfEdges.push_back(e3); mesh->vertices.push_back(v3);
-                mesh->halfEdges.push_back(e4); mesh->vertices.push_back(v4);
-                mesh->halfEdges.push_back(e5); mesh->vertices.push_back(v5);
-                mesh->halfEdges.push_back(e6); mesh->vertices.push_back(v6);
 
                 if(latitudes==2){
                     e2.halfEdgePair = e5.index;
@@ -461,18 +458,18 @@ namespace COL781 {
 
                         HalfEdge prevLeftTop = mesh->halfEdges[topLeftFace.halfEdge];
                         e1.halfEdgePair = prevLeftTop.index;
-                        prevLeftTop.halfEdgePair = e1.index;
+                        mesh->halfEdges[prevLeftTop.index].halfEdgePair = e1.index;
                         HalfEdge prevLeftBottom = mesh->halfEdges[mesh->halfEdges[bottomLeftFace.halfEdge].halfEdgeNext];
                         e6.halfEdgePair = prevLeftBottom.index;
-                        prevLeftBottom.halfEdgePair = e6.index;
+                        mesh->halfEdges[prevLeftBottom.index].halfEdgePair = e6.index;
                         if(j==longitudes-1){
                             HalfEdge prevRightTop = mesh->halfEdges[0];
                             e3.halfEdgePair = prevRightTop.index;
-                            prevRightTop.halfEdgePair = e3.index;
+                            mesh->halfEdges[prevRightTop.index].halfEdgePair = e3.index;
 
                             HalfEdge prevRightBottom = mesh->halfEdges[5];
                             e4.halfEdgePair = prevRightBottom.index;
-                            prevRightBottom.halfEdgePair = e4.index;
+                            mesh->halfEdges[prevRightBottom.index].halfEdgePair = e4.index;
                         }
                     }
                 }
@@ -480,12 +477,12 @@ namespace COL781 {
                     Face bottomFace = mesh->faces[2*j];
                     HalfEdge prevDown = mesh->halfEdges[mesh->halfEdges[bottomFace.halfEdge].halfEdgeNext];
                     e2.halfEdgePair = prevDown.index;
-                    prevDown.halfEdgePair = e2.index;
+                    mesh->halfEdges[prevDown.index].halfEdgePair = e2.index;
 
                     Face topFace = mesh->faces[2*(latitudes-3)*longitudes + 2*j + 1];
                     HalfEdge prevUp = mesh->halfEdges[mesh->halfEdges[topFace.halfEdge].halfEdgeNext];
                     e5.halfEdgePair = prevUp.index;
-                    prevUp.halfEdgePair = e5.index;
+                    mesh->halfEdges[prevUp.index].halfEdgePair = e5.index;
     
                     if(j!=0){
                         Face topLeftFace = mesh->faces[topTriangle.index - 2];
@@ -493,21 +490,28 @@ namespace COL781 {
 
                         HalfEdge prevLeftTop = mesh->halfEdges[topLeftFace.halfEdge];
                         e1.halfEdgePair = prevLeftTop.index;
-                        prevLeftTop.halfEdgePair = e1.index;
+                        mesh->halfEdges[prevLeftTop.index].halfEdgePair = e1.index;
                         HalfEdge prevLeftBottom = mesh->halfEdges[mesh->halfEdges[bottomLeftFace.halfEdge].halfEdgeNext];
                         e6.halfEdgePair = prevLeftBottom.index;
-                        prevLeftBottom.halfEdgePair = e6.index;
+                        mesh->halfEdges[prevLeftBottom.index].halfEdgePair = e6.index;
                         if(j==longitudes-1){
-                            HalfEdge prevRightTop = mesh->halfEdges[mesh->halfEdges[mesh->faces[2*(latitudes-2)*longitudes].halfEdge].halfEdgeNext];
+                            HalfEdge prevRightTop = mesh->halfEdges[mesh->halfEdges[mesh->faces[topTriangle.index - 2*(longitudes-1)].halfEdge].halfEdgeNext];
                             e3.halfEdgePair = prevRightTop.index;
-                            prevRightTop.halfEdgePair = e3.index;
-                            HalfEdge prevRightBottom = mesh->halfEdges[mesh->faces[2*(latitudes-2)*longitudes + 1].halfEdge];
+                            mesh->halfEdges[prevRightTop.index].halfEdgePair = e3.index;
+                            HalfEdge prevRightBottom = mesh->halfEdges[mesh->faces[bottomTriangle.index - 2*(longitudes-1)].halfEdge];
                             e4.halfEdgePair = prevRightBottom.index;
-                            prevRightBottom.halfEdgePair = e4.index; 
+                            mesh->halfEdges[prevRightBottom.index].halfEdgePair = e4.index; 
                         } 
     
                     }
                 }
+
+                mesh->halfEdges.push_back(e1); mesh->vertices.push_back(v1);
+                mesh->halfEdges.push_back(e2); mesh->vertices.push_back(v2);
+                mesh->halfEdges.push_back(e3); mesh->vertices.push_back(v3);
+                mesh->halfEdges.push_back(e4); mesh->vertices.push_back(v4);
+                mesh->halfEdges.push_back(e5); mesh->vertices.push_back(v5);
+                mesh->halfEdges.push_back(e6); mesh->vertices.push_back(v6);
 
                 mesh->faces.push_back(topTriangle);
                 mesh->faces.push_back(bottomTriangle);
@@ -838,8 +842,12 @@ namespace COL781 {
         // part 2.2 edge flipping, splitting, collapsing, testing mesh connectivity
         void Mesh::flipEdge(Mesh* mesh, int halfEdgeIndex){
             glm::vec3 newPos1 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].head].position;
+            // std::cout<<newPos1.x<<" "<<newPos1.y<<" "<<newPos1.z<<"\n";
+            int pair = mesh->halfEdges[halfEdgeIndex].halfEdgePair;
+            // std::cout<<pair<<"\n";
             glm::vec3 newPos2 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].halfEdgeNext].head].position;
-
+            // std::cout << "Flipping edge\n";
+            // std::cout<<newPos2.x<<" "<<newPos2.y<<" "<<newPos2.z<<"\n";
             int left = mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].halfEdgePair;
             int leftRight = mesh->halfEdges[halfEdgeIndex].halfEdgeNext;
 
@@ -854,7 +862,7 @@ namespace COL781 {
 
             mesh->halfEdges[halfEdgeIndex].halfEdgePair = right;
             mesh->halfEdges[right].halfEdgePair = a;
-            mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].halfEdgePair = left;
+            mesh->halfEdges[b].halfEdgePair = left;
             mesh->halfEdges[left].halfEdgePair = b;  
             mesh->halfEdges[rightLeft].halfEdgePair = leftRight;
             mesh->halfEdges[leftRight].halfEdgePair = rightLeft;
