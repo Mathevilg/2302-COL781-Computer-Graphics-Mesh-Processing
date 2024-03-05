@@ -25,7 +25,7 @@ int main() {
     int rows = 100, columns = 100;
     V::Mesh mesh;
     // mesh = *mesh.createSquare(rows, columns);
-    mesh = *mesh.createSphere(10,10);
+    mesh = *mesh.createSphere(360,360);
     if (!v.initialize("Mesh viewer", 640, 480)) {
         return EXIT_FAILURE;
     }

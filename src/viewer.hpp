@@ -131,6 +131,10 @@ namespace COL781 {
             void collapseEdge(Mesh* mesh, int halfEdgeIndex);
 
             bool testMeshConnectivity(Mesh* mesh);
+
+            // Part 2.3
+            /*Function to apply loop subdivision on the mesh. */
+            void loopSubdivision(Mesh* mesh);
         };
 
         

@@ -173,11 +173,23 @@ namespace COL781 {
 
         void Vertex::traverseNeighbouringTriangles(std::vector<HalfEdge> &halfEdges, Vertex* v){
             HalfEdge h = halfEdges[v->halfEdge];
+            bool f = 0;
             do {
                 // do something with h->left;
+                if(halfEdges[h.halfEdgeNext].halfEdgePair==-1){
+                    f = 1;
+                    break;
+                }
                 h = halfEdges[halfEdges[h.halfEdgeNext].halfEdgePair];
             }
             while (h.index != halfEdges[v->halfEdge].index);
+
+            if(f){
+                h = halfEdges[v->halfEdge];
+                while(h.halfEdgePair!=-1){
+                    h = halfEdges[halfEdges[halfEdges[h.halfEdgePair].halfEdgeNext].halfEdgeNext];
+                }
+            }
         }
 
         void Mesh::createScene(Viewer* viewer){   
@@ -847,15 +859,15 @@ namespace COL781 {
             e5.left = currFaceLen+1;
             e6.left = currFaceLen+1;
             e1.halfEdgePair = currLen+3;
-            e2.halfEdgePair = mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].halfEdgePair;
-            mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].halfEdgePair].halfEdgePair = currLen+1;
-            e3.halfEdgePair = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].halfEdgeNext].halfEdgePair;
             mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].halfEdgeNext].halfEdgePair].halfEdgePair = currLen+2;
+            e3.halfEdgePair = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].halfEdgeNext].halfEdgePair;
+            e2.halfEdgePair = mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].halfEdgeNext;
+            mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].halfEdgeNext].halfEdgePair = currLen+1;
             e4.halfEdgePair = currLen;
             e5.halfEdgePair = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].halfEdgeNext].halfEdgePair;
             mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].halfEdgeNext].halfEdgePair].halfEdgePair = currLen+4;
-            e6.halfEdgePair = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].halfEdgeNext].halfEdgeNext].halfEdgePair;
-            mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].halfEdgeNext].halfEdgeNext].halfEdgePair].halfEdgePair = currLen+5;
+            e6.halfEdgePair = mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].halfEdgeNext;
+            mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].halfEdgeNext].halfEdgePair = currLen+5;
             v1.halfEdge = currLen+2;
             v2.halfEdge = currLen;
             v3.halfEdge = currLen+1;
@@ -902,6 +914,14 @@ namespace COL781 {
         bool Mesh::testMeshConnectivity(Mesh* mesh){return true;}
         // invariants : vertices, edges, faces count
         // 
+
+        // part 2.3
+        /* Function to apply loopSubdivision on a given mesh. 
+           Algo: 1. Split all the original edges of the mesh, then flip every edge that connects an original vertex to a newly created vertex. After that, update all the vertex positions.
+                 2. It’s probably better to precompute the updated vertex positions before doing any splits, because it’s easier to find the relevant neighbourhoods.*/
+        void Mesh::loopSubdivision(Mesh* mesh){
+            
+        }
 
     }
 }
