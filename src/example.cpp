@@ -25,9 +25,9 @@ int main() {
     int rows = 2, columns = 2;
     V::Mesh mesh;
     // mesh = *mesh.createSquare(rows, columns);
-    mesh = *mesh.createSphere(10,10);
+    // mesh = *mesh.createSphere(10,10);
     std::string filePath = "../meshes/bunny-1k.obj";
-    // mesh = mesh.loadMesh(filePath);
+    mesh = mesh.loadMesh(filePath);
     if (!v.initialize("Mesh viewer", 640, 480)) {
         return EXIT_FAILURE;
     }

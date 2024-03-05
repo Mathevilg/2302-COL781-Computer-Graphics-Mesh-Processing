@@ -1172,8 +1172,8 @@ namespace COL781 {
             mesh->halfEdges = newEdges;
             mesh->faces = newFaces;
 
-            // std::cout<<mesh->faces.size()<<std::endl;
-            //Updating the old vertices
+            // Updating the old vertices
+            
             // std::vector<glm::vec3> newPositions;
             // for(auto vertex:oldVertices){
             //     glm::vec3 newPos = glm::vec3(0.0,0.0,0.0);
