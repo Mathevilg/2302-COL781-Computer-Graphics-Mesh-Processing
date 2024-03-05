@@ -584,7 +584,15 @@ namespace COL781 {
                     f.index = faceCount;
 
                     int i,j,k;
-                    iss >> i >> j >> k;
+                    std::string ii,jj,kk;
+                    iss >> ii >> jj >> kk;
+
+                    std::cout << "here!!!\n";
+                    if (ii.find("//") != std::string::npos){
+                        i = std::stoi(ii.substr(0,ii.find("//"))); j = std::stoi(jj.substr(0,jj.find("//"))); k = std::stoi(kk.substr(0,kk.find("//"))); 
+                        std::cout << i << " " << j << " " << k << "\n";
+                    }
+                    else {i = std::stoi(ii); j = std::stoi(jj); k = std::stoi(kk);}
                     v1.position = mesh.positions[i-1];
                     v2.position = mesh.positions[j-1];
                     v3.position = mesh.positions[k-1];
@@ -641,6 +649,7 @@ namespace COL781 {
                 }
                 // assuming that the object file contains vn first followed by v.
                 else if (type =="vn"){
+                    std::cout << "vn\n";
                     Vertex v;
                     // float x,y,z;
                     iss >> x >> y >> z;
@@ -654,7 +663,8 @@ namespace COL781 {
 
                 else if (type == "v"){
                     // float x,y,z;
-                    if (normalCount==0){
+                    std::cout << "v\n";
+                    // if (normalCount==0){
                         // Vertex v;
                         // // float x,y,z;
                         iss >> x >> y >> z;
@@ -664,13 +674,18 @@ namespace COL781 {
                         // mesh.vertices.push_back(v);
                         // vertexCount++;
                         mesh.positions.push_back(glm::vec3(x,y,z));
-                    }
-                    else {
-                        iss >> x >> y >> z;
-                        mesh.vertices[vertexCount].position = glm::vec3(x,y,z);
-                        vertexCount++;
-                    }
+                    // }
+                    // else {
+                    //     iss >> x >> y >> z;
+                    //     mesh.vertices[vertexCount].position = glm::vec3(x,y,z);
+                    //     vertexCount++;
+                    // }
                 }
+            }
+
+            // set all pairs index as -1 (done for implementing meshes with boundaries)
+            for (int i=0; i<mesh.halfEdges.size(); i++) {
+                mesh.halfEdges[i].halfEdgePair=-1;
             }
 
             // Now traverse the edges once agan to set the pairs
@@ -688,6 +703,18 @@ namespace COL781 {
                     
                 }
             }
+
+            // // now traverse once again for boundary meshes
+            // for (int i=0; i<(mesh.vertices).size(); i++){
+            //     // for each vertex take the weighted average of normals of each faces with weights proportional to the areas of faces
+            //     int start = i;
+            //     int count =0;
+            //     while (mesh.halfEdges[mesh.vertices[start].halfEdge].halfEdgePair != -1 && count<10){
+            //         start = mesh.halfEdges[mesh.halfEdges[mesh.halfEdges[mesh.halfEdges[mesh.vertices[start].halfEdge].halfEdgePair].halfEdgeNext].halfEdgeNext].head;
+            //         std::cout << start << "\n";
+            //         count++;
+            //     }
+            // }
             
             return mesh;
         }
@@ -696,12 +723,23 @@ namespace COL781 {
         void Mesh::recomputeVertexNormals(Mesh* mesh){
             for (int i=0; i<(mesh->vertices).size(); i++){
                 // for each vertex take the weighted average of normals of each faces with weights proportional to the areas of faces
+                int start = i;
+                // int count =0;
+                do {
+                    if (mesh->halfEdges[mesh->vertices[start].halfEdge].halfEdgePair == -1) break;
+                    start = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->vertices[start].halfEdge].halfEdgePair].halfEdgeNext].halfEdgeNext].head;
+                    std::cout << start << "\n";
+                    // count++;
+                } while (start!=i);
+                std::cout << "\n\n";
 
-                int he = (mesh->vertices[i]).halfEdge;
+                int he = (mesh->vertices[start]).halfEdge;
                 std::vector<float> areas;
                 std::vector<glm::vec3> normls;
+                bool flag = 0;
                 do {
                 // do something with h->left;
+                    if (mesh->halfEdges[he].halfEdgeNext == -1){flag=1;break;}
                     glm::vec3 v1 = mesh->vertices[mesh->halfEdges[he].head].position;
                     glm::vec3 v2 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].head].position;
                     glm::vec3 v3 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].halfEdgeNext].head].position;
@@ -715,7 +753,7 @@ namespace COL781 {
                     normls.push_back(n/glm::length(n));
                     // std::cout << "n: " << n.x << " " << n.y << " " << n.z << "\n";
                     he = mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].halfEdgePair;  // h = h->next->pair;
-                } while (he != (mesh->vertices[i]).halfEdge);
+                } while (he != (mesh->vertices[i]).halfEdge && he!=-1);
 
                 glm::vec3 interpolatedNormal = glm::vec3(0.0, 0.0, 0.0);
                 float areaSum=0.0;
@@ -733,22 +771,23 @@ namespace COL781 {
 
         void Mesh::naiveSmoothing(Mesh* mesh, float lambda, int iter){
             for (int iterations=0; iterations<iter; iterations++){
-                for (int i=0; i<(mesh->vertices).size(); i++){
-                    int he = (mesh->vertices[i]).halfEdge;
+                Mesh newMesh = *mesh;
+                for (int i=0; i<(newMesh.vertices).size(); i++){
+                    int he = (newMesh.vertices[i]).halfEdge;
                     glm::vec3 sumNeighbours = glm::vec3(0.0,0.0,0.0);
                     int neighbours=0;
                     do {
                     // do something with h->head;
-                        glm::vec3 v1 = mesh->vertices[mesh->halfEdges[he].head].position;
-                        glm::vec3 v2 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].head].position;
-                        glm::vec3 v3 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].halfEdgeNext].head].position;
+                        glm::vec3 v1 = newMesh.vertices[newMesh.halfEdges[he].head].position;
+                        glm::vec3 v2 = newMesh.vertices[newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].head].position;
+                        glm::vec3 v3 = newMesh.vertices[newMesh.halfEdges[newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].halfEdgeNext].head].position;
                         sumNeighbours += v2;
                         sumNeighbours += v3;
-                        he = mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].halfEdgePair;  // h = h->next->pair;
+                        he = newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].halfEdgePair;  // h = h->next->pair;
                         neighbours++;
-                    } while (he != (mesh->vertices[i]).halfEdge);
+                    } while (he != (newMesh.vertices[i]).halfEdge);
                     sumNeighbours /= (2.0*neighbours);
-                    glm::vec3 delta = sumNeighbours - mesh->vertices[mesh->halfEdges[he].head].position;
+                    glm::vec3 delta = sumNeighbours - newMesh.vertices[newMesh.halfEdges[he].head].position;
                     mesh->vertices[mesh->halfEdges[he].head].position += lambda*delta;
                 }
             }
@@ -756,40 +795,42 @@ namespace COL781 {
 
         void Mesh::taubinSmoothing(Mesh* mesh, float lambda, float mu, int iter){
             for (int iterations=0; iterations<iter; iterations++){
-                for (int i=0; i<(mesh->vertices).size(); i++){
-                    int he = (mesh->vertices[i]).halfEdge;
+                Mesh newMesh = *mesh;
+                for (int i=0; i<(newMesh.vertices).size(); i++){
+                    int he = (newMesh.vertices[i]).halfEdge;
                     glm::vec3 sumNeighbours = glm::vec3(0.0,0.0,0.0);
                     int neighbours=0;
                     do {
                     // do something with h->head;
-                        glm::vec3 v1 = mesh->vertices[mesh->halfEdges[he].head].position;
-                        glm::vec3 v2 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].head].position;
-                        glm::vec3 v3 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].halfEdgeNext].head].position;
+                        glm::vec3 v1 = newMesh.vertices[newMesh.halfEdges[he].head].position;
+                        glm::vec3 v2 = newMesh.vertices[newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].head].position;
+                        glm::vec3 v3 = newMesh.vertices[newMesh.halfEdges[newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].halfEdgeNext].head].position;
                         sumNeighbours += v2;
                         sumNeighbours += v3;
-                        he = mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].halfEdgePair;  // h = h->next->pair;
+                        he = newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].halfEdgePair;  // h = h->next->pair;
                         neighbours++;
-                    } while (he != (mesh->vertices[i]).halfEdge);
+                    } while (he != (newMesh.vertices[i]).halfEdge);
                     sumNeighbours /= (2.0*neighbours);
-                    glm::vec3 delta = sumNeighbours - mesh->vertices[mesh->halfEdges[he].head].position;
+                    glm::vec3 delta = sumNeighbours - newMesh.vertices[newMesh.halfEdges[he].head].position;
                     mesh->vertices[mesh->halfEdges[he].head].position += lambda*delta;
                 }
-                for (int i=0; i<(mesh->vertices).size(); i++){
-                    int he = (mesh->vertices[i]).halfEdge;
+                newMesh = *mesh;
+                for (int i=0; i<(newMesh.vertices).size(); i++){
+                    int he = (newMesh.vertices[i]).halfEdge;
                     glm::vec3 sumNeighbours = glm::vec3(0.0,0.0,0.0);
                     int neighbours=0;
                     do {
                     // do something with h->head;
-                        glm::vec3 v1 = mesh->vertices[mesh->halfEdges[he].head].position;
-                        glm::vec3 v2 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].head].position;
-                        glm::vec3 v3 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].halfEdgeNext].head].position;
+                        glm::vec3 v1 = newMesh.vertices[newMesh.halfEdges[he].head].position;
+                        glm::vec3 v2 = newMesh.vertices[newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].head].position;
+                        glm::vec3 v3 = newMesh.vertices[newMesh.halfEdges[newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].halfEdgeNext].head].position;
                         sumNeighbours += v2;
                         sumNeighbours += v3;
-                        he = mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].halfEdgePair;  // h = h->next->pair;
+                        he = newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].halfEdgePair;  // h = h->next->pair;
                         neighbours++;
-                    } while (he != (mesh->vertices[i]).halfEdge);
+                    } while (he != (newMesh.vertices[i]).halfEdge);
                     sumNeighbours /= (2.0*neighbours);
-                    glm::vec3 delta = sumNeighbours - mesh->vertices[mesh->halfEdges[he].head].position;
+                    glm::vec3 delta = sumNeighbours - newMesh.vertices[newMesh.halfEdges[he].head].position;
                     mesh->vertices[mesh->halfEdges[he].head].position += lambda*mu;
                 }
             }
@@ -912,9 +953,77 @@ namespace COL781 {
             } while (he != (mesh->vertices[v2]).halfEdge);
 
         }
-        bool Mesh::testMeshConnectivity(Mesh* mesh){return true;}
-        // invariants : vertices, edges, faces count
-        // 
+
+
+        bool Mesh::testMeshConnectivity(Mesh* mesh){
+            // Vertex edge connectivity
+            for (int i=0; i<mesh->vertices.size(); i++){
+                if (mesh->halfEdges[mesh->vertices[i].halfEdge].head != i) {
+                    std::cout << "Vertex-Edge connectivity violated\n";
+                    return false;
+                }
+            }
+            for (int i=0; i<mesh->halfEdges.size(); i++){
+                if (mesh->vertices[mesh->halfEdges[i].head].halfEdge != i) {
+                    std::cout << "Vertex-Edge connectivity violated\n";
+                    return false;
+                }
+            }
+
+            // Edge face connectivity
+            for (int i=0; i<mesh->faces.size(); i++){
+                if (mesh->halfEdges[mesh->faces[i].halfEdge].left != i) {
+                    std::cout << "Edge-Face connectivity violated\n";
+                    return false;
+                }
+            }
+            for (int i=0; i<mesh->halfEdges.size(); i++){
+                if (mesh->faces[mesh->halfEdges[i].left].halfEdge != i) {
+                    std::cout << "Edge-Face connectivity violated\n";
+                    return false;
+                }
+            }
+
+            // Half edges connectivity
+            for (int i=0; i<mesh->halfEdges.size(); i++){
+                int e1 = mesh->halfEdges[i].halfEdgeNext;
+                int e2 = mesh->halfEdges[e1].halfEdgeNext;
+                int e3 = mesh->halfEdges[e2].halfEdgeNext;
+                if (e3!=i) {
+                    std::cout << "Half edges connectivity violated\n";
+                    return false;
+                }
+            }
+
+            // Opposite half edges connectivity
+            for (int i=0; i<mesh->halfEdges.size(); i++){
+                int e1 = mesh->halfEdges[i].halfEdgePair;
+                if (e1==-1) continue;
+                int e2 = mesh->halfEdges[e1].halfEdgePair;
+                if (e2!=i) {
+                    std::cout << "Opposite half edges connectivity violated\n";
+                    return false;
+                }
+            }
+
+            // Consistent orientation
+            for (int i=0; i<mesh->halfEdges.size(); i++){
+                int pair = mesh->halfEdges[i].halfEdgePair;
+                if (pair==-1) continue;
+                glm::vec3 pos1 = mesh->vertices[mesh->halfEdges[i].head].position;
+                glm::vec3 pos2 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[i].halfEdgeNext].halfEdgeNext].head].position;
+                glm::vec3 pos3 = mesh->vertices[mesh->halfEdges[pair].head].position;
+                glm::vec3 pos4 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[pair].halfEdgeNext].halfEdgeNext].head].position;
+                if (pos1!=pos4 || pos2!=pos3) {
+                    std::cout << "Inconsistent orientation\n";
+                    return false;
+                }
+            }
+
+            // Boundary handling
+            return true;
+        }
+
 
         // part 2.3
         
