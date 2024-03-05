@@ -1099,12 +1099,6 @@ namespace COL781 {
                 e8.halfEdgePair = e11.index; e11.halfEdgePair = e8.index;
                 e9.halfEdgePair = e15.index; e15.halfEdgePair = e9.index;
 
-                newVertices.push_back(v4); newVertices.push_back(v5); newVertices.push_back(v6); newVertices.push_back(v7); newVertices.push_back(v8); newVertices.push_back(v9);
-                newVertices.push_back(v10); newVertices.push_back(v11); newVertices.push_back(v12); newVertices.push_back(v13); newVertices.push_back(v14); newVertices.push_back(v15);
-                newEdges.push_back(e4); newEdges.push_back(e5); newEdges.push_back(e6); newEdges.push_back(e7); newEdges.push_back(e8); newEdges.push_back(e9);
-                newEdges.push_back(e10); newEdges.push_back(e11); newEdges.push_back(e12); newEdges.push_back(e13); newEdges.push_back(e14); newEdges.push_back(e15);
-
-                newFaces.push_back(f1); newFaces.push_back(f2); newFaces.push_back(f3); newFaces.push_back(f4);
 
                 if(edgeMap.find(e1.halfEdgePair)!=edgeMap.end()){
                     std::pair<int,int> pair1 = edgeMap[e1.halfEdgePair].first;
@@ -1165,49 +1159,62 @@ namespace COL781 {
                 else{
                     edgeMap[e3.index] = {{v2.index,e10.index},{v3.index,e13.index}};
                 }
+
+                newVertices.push_back(v4); newVertices.push_back(v5); newVertices.push_back(v6); newVertices.push_back(v7); newVertices.push_back(v8); newVertices.push_back(v9);
+                newVertices.push_back(v10); newVertices.push_back(v11); newVertices.push_back(v12); newVertices.push_back(v13); newVertices.push_back(v14); newVertices.push_back(v15);
+                newEdges.push_back(e4); newEdges.push_back(e5); newEdges.push_back(e6); newEdges.push_back(e7); newEdges.push_back(e8); newEdges.push_back(e9);
+                newEdges.push_back(e10); newEdges.push_back(e11); newEdges.push_back(e12); newEdges.push_back(e13); newEdges.push_back(e14); newEdges.push_back(e15);
+
+                newFaces.push_back(f1); newFaces.push_back(f2); newFaces.push_back(f3); newFaces.push_back(f4);
             }
 
             mesh->vertices = newVertices;
             mesh->halfEdges = newEdges;
             mesh->faces = newFaces;
 
+            // std::cout<<mesh->faces.size()<<std::endl;
             //Updating the old vertices
-            for(auto vertex:oldVertices){
-                glm::vec3 newPos = glm::vec3(0.0,0.0,0.0);
-                int count = 0;
-                HalfEdge he = mesh->halfEdges[mesh->vertices[vertex].halfEdge];
-                bool f =0;
-                do {
-                    if(mesh->halfEdges[he.halfEdgeNext].halfEdgePair==-1){
-                        f = 1;
-                        break;
-                    }
-                    HalfEdge nextEdge = mesh->halfEdges[he.halfEdgeNext];
-                    newPos+=mesh->vertices[nextEdge.head].position;
-                    he = mesh->halfEdges[nextEdge.halfEdgePair];
-                    count++;
-                }
-                while (he.index != mesh->halfEdges[mesh->vertices[vertex].halfEdge].index);
+            // std::vector<glm::vec3> newPositions;
+            // for(auto vertex:oldVertices){
+            //     glm::vec3 newPos = glm::vec3(0.0,0.0,0.0);
+            //     int count = 0;
+            //     HalfEdge he = mesh->halfEdges[mesh->vertices[vertex].halfEdge];
+            //     bool f =0;
+            //     do {
+            //         if(mesh->halfEdges[he.halfEdgeNext].halfEdgePair==-1){
+            //             f = 1;
+            //             break;
+            //         }
+            //         HalfEdge nextEdge = mesh->halfEdges[he.halfEdgeNext];
+            //         newPos+=mesh->vertices[nextEdge.head].position;
+            //         he = mesh->halfEdges[nextEdge.halfEdgePair];
+            //         count++;
+            //     }
+            //     while (he.index != mesh->halfEdges[mesh->vertices[vertex].halfEdge].index);
 
-                if(f){
-                    he = mesh->halfEdges[mesh->vertices[vertex].halfEdge];
-                    while(he.halfEdgePair!=-1){
-                        HalfEdge pairEdge = mesh->halfEdges[he.halfEdgePair];
-                        newPos+=mesh->vertices[pairEdge.head].position;
-                        he = mesh->halfEdges[mesh->halfEdges[pairEdge.halfEdgeNext].halfEdgeNext];
-                        count++;
-                    }
-                }
+            //     if(f){
+            //         he = mesh->halfEdges[mesh->vertices[vertex].halfEdge];
+            //         while(he.halfEdgePair!=-1){
+            //             HalfEdge pairEdge = mesh->halfEdges[he.halfEdgePair];
+            //             newPos+=mesh->vertices[pairEdge.head].position;
+            //             he = mesh->halfEdges[mesh->halfEdges[pairEdge.halfEdgeNext].halfEdgeNext];
+            //             count++;
+            //         }
+            //     }
 
-                float x = (3.0+2.0*cos(glm::two_pi<float>()/count));
-                float a = (x*x)/32.0f - 0.25f;
-                float b = (1-a)/count;
+            //     float x = (3.0+2.0*cos(glm::two_pi<float>()/count));
+            //     float a = (x*x)/32.0f - 0.25f;
+            //     float b = (1-a)/count;
                 
-                newPos*=b;
-                newPos+=mesh->vertices[vertex].position*a;
-                mesh->vertices[vertex].position = newPos;
-            }
+            //     newPos*=b;
+            //     newPos+=mesh->vertices[vertex].position*a;
+            //     // mesh->vertices[vertex].position = newPos;
+            //     newPositions.push_back(newPos);
+            // }
 
+            // for(int i=0;i<oldVertices.size();i++){
+            //     mesh->vertices[oldVertices[i]].position = newPositions[i];
+            // }
 
         }
 
