@@ -29,6 +29,7 @@ int main() {
     if (!v.initialize("Mesh viewer", 640, 480)) {
         return EXIT_FAILURE;
     }
+    // mesh.loopSubdivision(mesh,1);
     mesh.createScene(&v);
     v.view();
     return 0;

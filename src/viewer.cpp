@@ -203,7 +203,6 @@ namespace COL781 {
             viewer->setTriangles(triangles.size(), triangles.data());
         }
 
-
         Mesh* Mesh::createSquare(int rows, int columns){
             Mesh* mesh = new Mesh();
 
@@ -292,6 +291,14 @@ namespace COL781 {
             return mesh;
         }
 
+        float theta(int j, int longitudes){
+            return static_cast<float>(j) / longitudes * glm::two_pi<float>();
+        }
+
+        float phi(int i, int latitudes){
+            return static_cast<float>(i) / latitudes * glm::pi<float>();
+        }
+
         Mesh* Mesh::createSphere(int longitudes, int latitudes){
             Mesh* mesh = new Mesh();
 
@@ -323,33 +330,42 @@ namespace COL781 {
             
             
             // Step 2: Initialize triangles
-            for (int i = 0; i < latitudes-2; i++) {
+            for (int i = 1; i < latitudes-1; i++) {
                 for (int j = 0; j < longitudes; j++) {
                     Face upperTriangle;
                     Face lowerTriangle;
         
                     HalfEdge e1, e2, e3, e4, e5, e6;
-        
-                    Vertex v1 = mesh->vertices[i * (longitudes) + j];
-                    Vertex v2 = mesh->vertices[i * (longitudes) + (j + 1)%longitudes];
-                    Vertex v3 = mesh->vertices[(i + 1) * (longitudes) + (j + 1)%longitudes];
-                    Vertex v4 = mesh->vertices[(i + 1) * (longitudes) + j];
+                    Vertex v1, v2, v3, v4, v5, v6;
+
+
+                    v1.position = glm::vec3(std::sin(phi(i,latitudes)) * std::cos(theta(j+1,longitudes)), std::sin(phi(i,latitudes)) * std::sin(theta(j+1,longitudes)), std::cos(phi(i,latitudes)));
+                    v2.position = glm::vec3(std::sin(phi(i,latitudes)) * std::cos(theta(j,longitudes)), std::sin(phi(i,latitudes)) * std::sin(theta(j,longitudes)), std::cos(phi(i,latitudes)));
+                    v3.position = glm::vec3(std::sin(phi(i+1,latitudes)) * std::cos(theta(j,longitudes)), std::sin(phi(i+1,latitudes)) * std::sin(theta(j,longitudes)), std::cos(phi(i+1,latitudes)));
+                    v4.position = glm::vec3(std::sin(phi(i+1,latitudes)) * std::cos(theta(j,longitudes)), std::sin(phi(i+1,latitudes)) * std::sin(theta(j,longitudes)), std::cos(phi(i+1,latitudes)));
+                    v5.position = glm::vec3(std::sin(phi(i+1,latitudes)) * std::cos(theta(j+1,longitudes)), std::sin(phi(i+1,latitudes)) * std::sin(theta(j+1,longitudes)), std::cos(phi(i+1,latitudes)));
+                    v6.position = glm::vec3(std::sin(phi(i,latitudes)) * std::cos(theta(j+1,longitudes)), std::sin(phi(i,latitudes)) * std::sin(theta(j+1,longitudes)), std::cos(phi(i,latitudes)));
+
+                    v1.normal = glm::normalize(v1.position); v2.normal = glm::normalize(v2.position); v3.normal = glm::normalize(v3.position);
+                    v4.normal = glm::normalize(v4.position); v5.normal = glm::normalize(v5.position); v6.normal = glm::normalize(v6.position);
 
                     int start_index = mesh->halfEdges.size();
-                    e1.head = v2.index; e1.index = start_index;
-                    e2.head = v1.index; e2.index = start_index + 1;
-                    e3.head = v4.index; e3.index = start_index + 2;
-                    e4.head = v4.index; e4.index = start_index + 3;
-                    e5.head = v3.index; e5.index = start_index + 4;
-                    e6.head = v2.index; e6.index = start_index + 5;
-                    
-                    v3.halfEdge = e5.index;
-                    if(i==0){
-                        v1.halfEdge = e2.index;
-                    }
 
-                    upperTriangle.index = 2*(i*longitudes + j);
-                    lowerTriangle.index = 2*(i*longitudes + j) + 1;
+                    v1.index = start_index; v2.index = start_index + 1; v3.index = start_index + 2;
+                    v4.index = start_index + 3; v5.index = start_index + 4; v6.index = start_index + 5;
+
+                    e1.head = v1.index; e1.index = start_index;
+                    e2.head = v2.index; e2.index = start_index + 1;
+                    e3.head = v3.index; e3.index = start_index + 2;
+                    e4.head = v4.index; e4.index = start_index + 3;
+                    e5.head = v5.index; e5.index = start_index + 4;
+                    e6.head = v6.index; e6.index = start_index + 5;
+                    
+                    v1.halfEdge = e1.index; v2.halfEdge = e2.index; v3.halfEdge = e3.index;
+                    v4.halfEdge = e4.index; v5.halfEdge = e5.index; v6.halfEdge = e6.index;
+
+                    upperTriangle.index = 2*((i-1)*longitudes + j);
+                    lowerTriangle.index = 2*((i-1)*longitudes + j) + 1;
                     upperTriangle.halfEdge = e1.index;
                     lowerTriangle.halfEdge = e4.index;
         
@@ -363,12 +379,12 @@ namespace COL781 {
                     e4.halfEdgePair = e1.index;
                     e1.halfEdgePair = e4.index;
         
-                    mesh->halfEdges.push_back(e1);
-                    mesh->halfEdges.push_back(e2);
-                    mesh->halfEdges.push_back(e3);
-                    mesh->halfEdges.push_back(e4);
-                    mesh->halfEdges.push_back(e5);
-                    mesh->halfEdges.push_back(e6);
+                    mesh->halfEdges.push_back(e1); mesh->vertices.push_back(v1);
+                    mesh->halfEdges.push_back(e2); mesh->vertices.push_back(v2);
+                    mesh->halfEdges.push_back(e3); mesh->vertices.push_back(v3);
+                    mesh->halfEdges.push_back(e4); mesh->vertices.push_back(v4);
+                    mesh->halfEdges.push_back(e5); mesh->vertices.push_back(v5);
+                    mesh->halfEdges.push_back(e6); mesh->vertices.push_back(v6);
         
         
                     if (i != 0 && j!=0) {
