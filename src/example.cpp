@@ -22,14 +22,15 @@ int main() {
     };
 
     V::Viewer v;
-    int rows = 10, columns = 10;
+    int rows = 5, columns = 5;
     V::Mesh mesh;
     mesh = *mesh.createSquare(rows, columns);
-    // mesh = *mesh.createSphere(360,360);
+    // mesh = *mesh.createSphere(100,100);
     if (!v.initialize("Mesh viewer", 640, 480)) {
         return EXIT_FAILURE;
     }
     // mesh.loopSubdivision(&mesh,1);
+    mesh.flipEdge(&mesh, 2);
     mesh.createScene(&v);
     v.view();
     return 0;

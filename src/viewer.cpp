@@ -262,7 +262,7 @@ namespace COL781 {
                     mesh->halfEdges.push_back(e6); mesh->vertices.push_back(v6);
 
                     if(i!=0 && j!=0){
-                        Face upFace = mesh->faces[2*((i-1)*columns + j)];
+                        Face upFace = mesh->faces[2*((i-1)*columns + j+1)];
                         Face leftFace = mesh->faces[2*(i*columns + j) - 1];
                         HalfEdge prevUp = mesh->halfEdges[mesh->halfEdges[upFace.halfEdge].halfEdgeNext];
                         HalfEdge prevLeft = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[leftFace.halfEdge].halfEdgeNext].halfEdgeNext];
@@ -272,7 +272,7 @@ namespace COL781 {
                         prevLeft.halfEdgePair = e3.index;
                     }
                     else if(i!=0){
-                        Face upFace = mesh->faces[2*((i-1)*columns + j)];
+                        Face upFace = mesh->faces[2*((i-1)*columns + j+1)];
                         HalfEdge prevUp = mesh->halfEdges[mesh->halfEdges[upFace.halfEdge].halfEdgeNext];
                         e2.halfEdgePair = prevUp.index;
                         prevUp.halfEdgePair = e2.index;
@@ -292,9 +292,8 @@ namespace COL781 {
         }
 
         float theta(int j, int longitudes){
-            return static_cast<float>(j) / longitudes * glm::two_pi<float>();
+            return static_cast<float>((j%longitudes)) / longitudes * glm::two_pi<float>();
         }
-
         float phi(int i, int latitudes){
             return static_cast<float>(i) / latitudes * glm::pi<float>();
         }
@@ -302,32 +301,7 @@ namespace COL781 {
         Mesh* Mesh::createSphere(int longitudes, int latitudes){
             Mesh* mesh = new Mesh();
 
-            // Step 1: Initialize vertices
-            for (int i = 1; i < latitudes; i++) {
-                for (int j = 0; j < longitudes; j++) {
-                    float theta = static_cast<float>(j) / longitudes * glm::two_pi<float>();
-                    float phi = static_cast<float>(i) / latitudes * glm::pi<float>();
-        
-                    Vertex v;
-                    v.position = glm::vec3(std::sin(phi) * std::cos(theta), std::sin(phi) * std::sin(theta), std::cos(phi));        
-                    v.colour = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
-                    v.normal = glm::normalize(v.position);
-                    v.index = (i-1) * longitudes + j;
-
-                    mesh->vertices.push_back(v);
-                    mesh->positions.push_back(v.position);
-                    mesh->vertexNormals.push_back(v.normal);
-                }
-            }
-            Vertex northPole, southPole;
-            northPole.position = glm::vec3(0.0f, 0.0f, 1.0f); southPole.position = glm::vec3(0.0f, 0.0f, -1.0f);
-            northPole.colour = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f); southPole.colour = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
-            northPole.normal = glm::vec3(0.0f, 0.0f, 1.0f); southPole.normal = glm::vec3(0.0f, 0.0f, -1.0f);
-            mesh->vertices.push_back(northPole); mesh->vertices.push_back(southPole);
-            mesh->positions.push_back(northPole.position); mesh->positions.push_back(southPole.position);
-            mesh->vertexNormals.push_back(northPole.normal); mesh->vertexNormals.push_back(southPole.normal);
-            northPole.index = (latitudes-1) * longitudes; southPole.index = (latitudes-1) * longitudes + 1;
-            
+            // Step 1: Initialize vertice
             
             // Step 2: Initialize triangles
             for (int i = 1; i < latitudes-1; i++) {
@@ -364,8 +338,8 @@ namespace COL781 {
                     v1.halfEdge = e1.index; v2.halfEdge = e2.index; v3.halfEdge = e3.index;
                     v4.halfEdge = e4.index; v5.halfEdge = e5.index; v6.halfEdge = e6.index;
 
-                    upperTriangle.index = 2*((i-1)*longitudes + j);
-                    lowerTriangle.index = 2*((i-1)*longitudes + j) + 1;
+                    upperTriangle.index = mesh->faces.size();
+                    lowerTriangle.index = mesh->faces.size() + 1;
                     upperTriangle.halfEdge = e1.index;
                     lowerTriangle.halfEdge = e4.index;
         
@@ -387,31 +361,37 @@ namespace COL781 {
                     mesh->halfEdges.push_back(e6); mesh->vertices.push_back(v6);
         
         
-                    if (i != 0 && j!=0) {
-                        HalfEdge prevUp = mesh->halfEdges[mesh->halfEdges[mesh->faces[2 * ((i - 1) * longitudes + j) + 1].halfEdge].halfEdgeNext];
-                        HalfEdge prevLeft = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->faces[2 * (i * longitudes + j) - 1].halfEdge].halfEdgeNext].halfEdgeNext];
+                    if (i != 1 && j!=0) {
+                        Face upFace = mesh->faces[lowerTriangle.index - 2*longitudes];
+                        Face leftFace = mesh->faces[upperTriangle.index - 1];
+                        HalfEdge prevUp = mesh->halfEdges[mesh->halfEdges[upFace.halfEdge].halfEdgeNext];
+                        HalfEdge prevLeft = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[leftFace.halfEdge].halfEdgeNext].halfEdgeNext];
                         e2.halfEdgePair = prevUp.index;
                         prevUp.halfEdgePair = e2.index;
                         e3.halfEdgePair = prevLeft.index;
                         prevLeft.halfEdgePair = e3.index;
                         if(j==longitudes-1){
-                            HalfEdge Right = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->faces[2 * ((i -1)* longitudes + j + 1) ].halfEdge].halfEdgeNext].halfEdgeNext];
+                            Face rightFace = mesh->faces[upperTriangle.index - 2*longitudes];
+                            HalfEdge Right = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[rightFace.halfEdge].halfEdgeNext].halfEdgeNext];
                             e6.halfEdgePair = Right.index;
                             Right.halfEdgePair = e6.index;
                         }
                     }
                     else if (j != 0) {
-                        HalfEdge prevLeft = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->faces[2 * (i * longitudes + j) - 1].halfEdge].halfEdgeNext].halfEdgeNext];
+                        Face leftFace = mesh->faces[upperTriangle.index - 1];
+                        HalfEdge prevLeft = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[leftFace.halfEdge].halfEdgeNext].halfEdgeNext];
                         e3.halfEdgePair = prevLeft.index;
                         prevLeft.halfEdgePair = e3.index;
                         if(j==longitudes-1){
-                            HalfEdge Right = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->faces[2 * ((i -1)* longitudes + j + 1) ].halfEdge].halfEdgeNext].halfEdgeNext];
+                            Face rightFace = mesh->faces[2*((i-1)*longitudes)];
+                            HalfEdge Right = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[rightFace.halfEdge].halfEdgeNext].halfEdgeNext];
                             e6.halfEdgePair = Right.index;
                             Right.halfEdgePair = e6.index;
                         }
                     }
-                    if (i != 0) {
-                        HalfEdge prevUp = mesh->halfEdges[mesh->halfEdges[mesh->faces[2 * ((i - 1) * longitudes + j) + 1].halfEdge].halfEdgeNext];
+                    if (i != 1) {
+                        Face upFace = mesh->faces[lowerTriangle.index - 2*longitudes];
+                        HalfEdge prevUp = mesh->halfEdges[mesh->halfEdges[upFace.halfEdge].halfEdgeNext];
                         e2.halfEdgePair = prevUp.index;
                         prevUp.halfEdgePair = e2.index;
                     }
@@ -426,25 +406,35 @@ namespace COL781 {
                 Face topTriangle;
                 Face bottomTriangle;
                 HalfEdge e1, e2, e3, e4, e5, e6;
-                Vertex v1 = mesh->vertices[j];
-                Vertex v2 = mesh->vertices[(j + 1)%longitudes];
-                Vertex v3 = mesh->vertices[(latitudes - 2) * (longitudes) + (j + 1)%longitudes];
-                Vertex v4 = mesh->vertices[(latitudes - 2) * (longitudes) + j];
+                Vertex v1, v2, v3, v4, v5, v6;
+
+                v1.position = glm::vec3(std::sin(phi(1,latitudes)) * std::cos(theta(j,longitudes)), std::sin(phi(1,latitudes)) * std::sin(theta(j,longitudes)), std::cos(phi(1,latitudes)));
+                v2.position = glm::vec3(std::sin(phi(1,latitudes)) * std::cos(theta(j+1,longitudes)), std::sin(phi(1,latitudes)) * std::sin(theta(j+1,longitudes)), std::cos(phi(1,latitudes)));
+                v3.position = glm::vec3(0.0f, 0.0f, 1.0f);
+                v4.position = glm::vec3(std::sin(phi(latitudes-1,latitudes)) * std::cos(theta(j+1,longitudes)), std::sin(phi(latitudes-1,latitudes)) * std::sin(theta(j+1,longitudes)), std::cos(phi(latitudes-1,latitudes)));
+                v5.position = glm::vec3(std::sin(phi(latitudes-1,latitudes)) * std::cos(theta(j,longitudes)), std::sin(phi(latitudes-1,latitudes)) * std::sin(theta(j,longitudes)), std::cos(phi(latitudes-1,latitudes)));
+                v6.position = glm::vec3(0.0f, 0.0f, -1.0f);
+
+                v1.normal = glm::normalize(v1.position); v2.normal = glm::normalize(v2.position); v3.normal = glm::normalize(v3.position);
+                v4.normal = glm::normalize(v4.position); v5.normal = glm::normalize(v5.position); v6.normal = glm::normalize(v6.position);
+
                 int start_index = mesh->halfEdges.size();
-                e1.head = northPole.index; e1.index = start_index;
-                e2.head = v1.index; e2.index = start_index + 1;
-                e3.head = v2.index; e3.index = start_index + 2;
-                e4.head = southPole.index; e4.index = start_index + 3;
-                e5.head = v4.index; e5.index = start_index + 4;
-                e6.head = v3.index; e6.index = start_index + 5;
 
-                if(j==0){
-                    northPole.halfEdge = e1.index;
-                    southPole.halfEdge = e4.index;
-                }
+                v1.index = start_index; v2.index = start_index + 1; v3.index = start_index + 2;
+                v4.index = start_index + 3; v5.index = start_index + 4; v6.index = start_index + 5;
 
-                topTriangle.index = 2*(latitudes-2)*longitudes+2*j;
-                bottomTriangle.index = 2*(latitudes-2)*longitudes+2*j + 1;
+                e1.head = v1.index; e1.index = start_index;
+                e2.head = v2.index; e2.index = start_index + 1;
+                e3.head = v3.index; e3.index = start_index + 2;
+                e4.head = v4.index; e4.index = start_index + 3;
+                e5.head = v5.index; e5.index = start_index + 4;
+                e6.head = v6.index; e6.index = start_index + 5;
+
+                v1.halfEdge = e1.index; v2.halfEdge = e2.index; v3.halfEdge = e3.index;
+                v4.halfEdge = e4.index; v5.halfEdge = e5.index; v6.halfEdge = e6.index;
+
+                topTriangle.index = mesh->faces.size();
+                bottomTriangle.index = mesh->faces.size()+1; //2*(latitudes-2)*longitudes+2*j + 1;
                 topTriangle.halfEdge = e3.index;
                 bottomTriangle.halfEdge = e6.index;
 
@@ -455,57 +445,65 @@ namespace COL781 {
                 e5.left = bottomTriangle.index; e5.halfEdgeNext = e6.index;
                 e6.left = bottomTriangle.index; e6.halfEdgeNext = e4.index;
 
-                mesh->halfEdges.push_back(e1);
-                mesh->halfEdges.push_back(e2);
-                mesh->halfEdges.push_back(e3);
-                mesh->halfEdges.push_back(e4);
-                mesh->halfEdges.push_back(e5);
-                mesh->halfEdges.push_back(e6);
+                mesh->halfEdges.push_back(e1); mesh->vertices.push_back(v1);
+                mesh->halfEdges.push_back(e2); mesh->vertices.push_back(v2);
+                mesh->halfEdges.push_back(e3); mesh->vertices.push_back(v3);
+                mesh->halfEdges.push_back(e4); mesh->vertices.push_back(v4);
+                mesh->halfEdges.push_back(e5); mesh->vertices.push_back(v5);
+                mesh->halfEdges.push_back(e6); mesh->vertices.push_back(v6);
 
                 if(latitudes==2){
-                    e3.halfEdgePair = e6.index;
-                    e6.halfEdgePair = e3.index;
+                    e2.halfEdgePair = e5.index;
+                    e5.halfEdgePair = e2.index;
                     if(j!=0){
-                        HalfEdge prevLeftTop = mesh->halfEdges[e2.index-7];
-                        e2.halfEdgePair = prevLeftTop.index;
-                        prevLeftTop.halfEdgePair = e2.index;
-                        HalfEdge prevLeftBottom = mesh->halfEdges[e4.index-5];
-                        e4.halfEdgePair = prevLeftBottom.index;
-                        prevLeftBottom.halfEdgePair = e4.index;
-                        if(j==longitudes-1){
-                            HalfEdge prevRightTop = mesh->halfEdges[1];
-                            e1.halfEdgePair = prevRightTop.index;
-                            prevRightTop.halfEdgePair = e1.index;
+                        Face topLeftFace = mesh->faces[topTriangle.index - 2];
+                        Face bottomLeftFace = mesh->faces[bottomTriangle.index - 2];
 
-                            HalfEdge prevRightBottom = mesh->halfEdges[3];
-                            e5.halfEdgePair = prevRightBottom.index;
-                            prevRightBottom.halfEdgePair = e5.index;
+                        HalfEdge prevLeftTop = mesh->halfEdges[topLeftFace.halfEdge];
+                        e1.halfEdgePair = prevLeftTop.index;
+                        prevLeftTop.halfEdgePair = e1.index;
+                        HalfEdge prevLeftBottom = mesh->halfEdges[mesh->halfEdges[bottomLeftFace.halfEdge].halfEdgeNext];
+                        e6.halfEdgePair = prevLeftBottom.index;
+                        prevLeftBottom.halfEdgePair = e6.index;
+                        if(j==longitudes-1){
+                            HalfEdge prevRightTop = mesh->halfEdges[0];
+                            e3.halfEdgePair = prevRightTop.index;
+                            prevRightTop.halfEdgePair = e3.index;
+
+                            HalfEdge prevRightBottom = mesh->halfEdges[5];
+                            e4.halfEdgePair = prevRightBottom.index;
+                            prevRightBottom.halfEdgePair = e4.index;
                         }
                     }
                 }
                 else{
-                    HalfEdge prevDown = mesh->halfEdges[mesh->halfEdges[mesh->faces[2*j].halfEdge].halfEdgeNext];
-                    e3.halfEdgePair = prevDown.index;
-                    prevDown.halfEdgePair = e3.index;
-    
-                    HalfEdge prevUp = mesh->halfEdges[mesh->halfEdges[mesh->faces[2*(latitudes-3)*longitudes + 2*j + 1].halfEdge].halfEdgeNext];
-                    e6.halfEdgePair = prevUp.index;
-                    prevUp.halfEdgePair = e6.index;
+                    Face bottomFace = mesh->faces[2*j];
+                    HalfEdge prevDown = mesh->halfEdges[mesh->halfEdges[bottomFace.halfEdge].halfEdgeNext];
+                    e2.halfEdgePair = prevDown.index;
+                    prevDown.halfEdgePair = e2.index;
+
+                    Face topFace = mesh->faces[2*(latitudes-3)*longitudes + 2*j + 1];
+                    HalfEdge prevUp = mesh->halfEdges[mesh->halfEdges[topFace.halfEdge].halfEdgeNext];
+                    e5.halfEdgePair = prevUp.index;
+                    prevUp.halfEdgePair = e5.index;
     
                     if(j!=0){
-                        HalfEdge prevLeftTop = mesh->halfEdges[mesh->halfEdges[mesh->faces[2*(latitudes-2)*longitudes + 2*j - 2].halfEdge].halfEdgeNext];
-                        e2.halfEdgePair = prevLeftTop.index;
-                        prevLeftTop.halfEdgePair = e2.index;
-                        HalfEdge prevLeftBottom = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->faces[2*(latitudes-2)*longitudes + 2*j - 1].halfEdge].halfEdgeNext].halfEdgeNext];
-                        e4.halfEdgePair = prevLeftBottom.index;
-                        prevLeftBottom.halfEdgePair = e4.index;
+                        Face topLeftFace = mesh->faces[topTriangle.index - 2];
+                        Face bottomLeftFace = mesh->faces[bottomTriangle.index - 2];
+
+                        HalfEdge prevLeftTop = mesh->halfEdges[topLeftFace.halfEdge];
+                        e1.halfEdgePair = prevLeftTop.index;
+                        prevLeftTop.halfEdgePair = e1.index;
+                        HalfEdge prevLeftBottom = mesh->halfEdges[mesh->halfEdges[bottomLeftFace.halfEdge].halfEdgeNext];
+                        e6.halfEdgePair = prevLeftBottom.index;
+                        prevLeftBottom.halfEdgePair = e6.index;
                         if(j==longitudes-1){
-                            HalfEdge prevRightTop = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->faces[2*(latitudes-2)*longitudes].halfEdge].halfEdgeNext].halfEdgeNext];
-                            e1.halfEdgePair = prevRightTop.index;
-                            prevRightTop.halfEdgePair = e1.index;
-                            HalfEdge prevRightBottom = mesh->halfEdges[mesh->halfEdges[mesh->faces[2*(latitudes-2)*longitudes + 1].halfEdge].halfEdgeNext];
-                            e5.halfEdgePair = prevRightBottom.index;
-                            prevRightBottom.halfEdgePair = e5.index; 
+                            HalfEdge prevRightTop = mesh->halfEdges[mesh->halfEdges[mesh->faces[2*(latitudes-2)*longitudes].halfEdge].halfEdgeNext];
+                            e3.halfEdgePair = prevRightTop.index;
+                            prevRightTop.halfEdgePair = e3.index;
+                            HalfEdge prevRightBottom = mesh->halfEdges[mesh->faces[2*(latitudes-2)*longitudes + 1].halfEdge];
+                            e4.halfEdgePair = prevRightBottom.index;
+                            prevRightBottom.halfEdgePair = e4.index; 
                         } 
     
                     }
@@ -547,6 +545,7 @@ namespace COL781 {
             for(auto face : mesh->faces){
                 auto edge = mesh->halfEdges[face.halfEdge];
                 triangles.push_back(glm::ivec3(edge.head, mesh->halfEdges[edge.halfEdgeNext].head, mesh->halfEdges[mesh->halfEdges[edge.halfEdgeNext].halfEdgeNext].head));
+                // std::cout << edge.head << " " << mesh->halfEdges[edge.halfEdgeNext].head << " " << mesh->halfEdges[mesh->halfEdges[edge.halfEdgeNext].halfEdgeNext].head << "\n";
             }
             return triangles;
         }
