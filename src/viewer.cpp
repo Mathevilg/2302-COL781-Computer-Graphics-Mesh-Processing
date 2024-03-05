@@ -508,15 +508,22 @@ namespace COL781 {
         }
 
         std::vector<glm::vec3> Mesh::getVertices(Mesh* mesh){
-            return mesh->positions;
+            std::vector<glm::vec3> pos;
+            for (auto v : mesh->vertices) pos.push_back(v.position);
+            // return mesh->positions;
+            return pos;
         }
         std::vector<glm::vec3> Mesh::getNormals(Mesh* mesh){
-            return mesh->vertexNormals;
+            // return mesh->vertexNormals;
+            std::vector<glm::vec3> nor;
+            for (auto v : mesh->vertices) nor.push_back(v.normal);
+            return nor;
         }
         std::vector<glm::vec4> Mesh::getColours(Mesh* mesh){
             std::vector<glm::vec4> colours;
 
             for(auto vertex : mesh->vertices){
+                // vertex.colour = glm::vec4(1.0, 0.0, 0.0, 1.0);
                 colours.push_back(vertex.colour);
             }
             return colours;
@@ -530,7 +537,6 @@ namespace COL781 {
             }
             return triangles;
         }
-        
 
         // Parts 1.3 and 1.4
 
@@ -662,7 +668,7 @@ namespace COL781 {
                     glm::vec3 b1 = mesh.vertices[mesh.halfEdges[j].head].position;
                     glm::vec3 b2 = mesh.vertices[mesh.halfEdges[mesh.halfEdges[mesh.halfEdges[j].halfEdgeNext].halfEdgeNext].head].position;
                     if (a1==b2 && a2==b1){
-                        std::cout << "Match!!\n";
+                        std::cout << "Match!!" << a1.y << a1.z << a2.y << a2.z << "\n";
                         mesh.halfEdges[i].halfEdgePair = j;
                         mesh.halfEdges[j].halfEdgePair = i;
                     }
@@ -778,6 +784,27 @@ namespace COL781 {
 
         // part 2.2 edge flipping, splitting, collapsing, testing mesh connectivity
         void Mesh::flipEdge(Mesh* mesh, int halfEdgeIndex){
+            glm::vec3 newPos1 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].head].position;
+            glm::vec3 newPos2 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].halfEdgeNext].head].position;
+
+            int left = mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].halfEdgePair;
+            int leftRight = mesh->halfEdges[halfEdgeIndex].halfEdgeNext;
+
+            int right = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].halfEdgeNext].halfEdgePair;
+            int rightLeft = mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].halfEdgeNext;
+            // int pair = mesh->halfEdges[halfEdgeIndex].halfEdgeNext;
+            int a = halfEdgeIndex;
+            int b = mesh->halfEdges[halfEdgeIndex].halfEdgePair;
+
+            mesh->vertices[mesh->halfEdges[halfEdgeIndex].head].position = newPos2;
+            mesh->vertices[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].head].position = newPos1;
+
+            mesh->halfEdges[halfEdgeIndex].halfEdgePair = right;
+            mesh->halfEdges[right].halfEdgePair = a;
+            mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].halfEdgePair = left;
+            mesh->halfEdges[left].halfEdgePair = b;  
+            mesh->halfEdges[rightLeft].halfEdgePair = leftRight;
+            mesh->halfEdges[leftRight].halfEdgePair = rightLeft;
         }
         void Mesh::splitEdge(Mesh* mesh, int halfEdgeIndex, float ratio){
         }

@@ -7,6 +7,7 @@
 #include <sstream>
 #include <map>
 #include <string>
+#include <iostream>
 
 
 namespace COL781 {
@@ -87,6 +88,7 @@ namespace COL781 {
             glm::vec3 normal;
             int halfEdge;
             int index;
+            // void traverseNeighbouringTriangles(Vertex* v);
             void traverseNeighbouringTriangles(std::vector<HalfEdge> &halfEdges, Vertex* v);
         };
 
@@ -110,7 +112,7 @@ namespace COL781 {
             std::vector<glm::vec4> getColours(Mesh* mesh);
             std::vector<glm::ivec3> getTriangles(Mesh* mesh);
             void createScene(Viewer* viewer);
-            // std::vector<Face> faces;
+                                    // std::vector<Face> faces;
 
 
 
