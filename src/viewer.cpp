@@ -755,22 +755,23 @@ namespace COL781 {
 
         void Mesh::naiveSmoothing(Mesh* mesh, float lambda, int iter){
             for (int iterations=0; iterations<iter; iterations++){
-                for (int i=0; i<(mesh->vertices).size(); i++){
-                    int he = (mesh->vertices[i]).halfEdge;
+                Mesh newMesh = *mesh;
+                for (int i=0; i<(newMesh.vertices).size(); i++){
+                    int he = (newMesh.vertices[i]).halfEdge;
                     glm::vec3 sumNeighbours = glm::vec3(0.0,0.0,0.0);
                     int neighbours=0;
                     do {
                     // do something with h->head;
-                        glm::vec3 v1 = mesh->vertices[mesh->halfEdges[he].head].position;
-                        glm::vec3 v2 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].head].position;
-                        glm::vec3 v3 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].halfEdgeNext].head].position;
+                        glm::vec3 v1 = newMesh.vertices[newMesh.halfEdges[he].head].position;
+                        glm::vec3 v2 = newMesh.vertices[newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].head].position;
+                        glm::vec3 v3 = newMesh.vertices[newMesh.halfEdges[newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].halfEdgeNext].head].position;
                         sumNeighbours += v2;
                         sumNeighbours += v3;
-                        he = mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].halfEdgePair;  // h = h->next->pair;
+                        he = newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].halfEdgePair;  // h = h->next->pair;
                         neighbours++;
-                    } while (he != (mesh->vertices[i]).halfEdge);
+                    } while (he != (newMesh.vertices[i]).halfEdge);
                     sumNeighbours /= (2.0*neighbours);
-                    glm::vec3 delta = sumNeighbours - mesh->vertices[mesh->halfEdges[he].head].position;
+                    glm::vec3 delta = sumNeighbours - newMesh.vertices[newMesh.halfEdges[he].head].position;
                     mesh->vertices[mesh->halfEdges[he].head].position += lambda*delta;
                 }
             }
@@ -778,40 +779,42 @@ namespace COL781 {
 
         void Mesh::taubinSmoothing(Mesh* mesh, float lambda, float mu, int iter){
             for (int iterations=0; iterations<iter; iterations++){
-                for (int i=0; i<(mesh->vertices).size(); i++){
-                    int he = (mesh->vertices[i]).halfEdge;
+                Mesh newMesh = *mesh;
+                for (int i=0; i<(newMesh.vertices).size(); i++){
+                    int he = (newMesh.vertices[i]).halfEdge;
                     glm::vec3 sumNeighbours = glm::vec3(0.0,0.0,0.0);
                     int neighbours=0;
                     do {
                     // do something with h->head;
-                        glm::vec3 v1 = mesh->vertices[mesh->halfEdges[he].head].position;
-                        glm::vec3 v2 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].head].position;
-                        glm::vec3 v3 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].halfEdgeNext].head].position;
+                        glm::vec3 v1 = newMesh.vertices[newMesh.halfEdges[he].head].position;
+                        glm::vec3 v2 = newMesh.vertices[newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].head].position;
+                        glm::vec3 v3 = newMesh.vertices[newMesh.halfEdges[newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].halfEdgeNext].head].position;
                         sumNeighbours += v2;
                         sumNeighbours += v3;
-                        he = mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].halfEdgePair;  // h = h->next->pair;
+                        he = newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].halfEdgePair;  // h = h->next->pair;
                         neighbours++;
-                    } while (he != (mesh->vertices[i]).halfEdge);
+                    } while (he != (newMesh.vertices[i]).halfEdge);
                     sumNeighbours /= (2.0*neighbours);
-                    glm::vec3 delta = sumNeighbours - mesh->vertices[mesh->halfEdges[he].head].position;
+                    glm::vec3 delta = sumNeighbours - newMesh.vertices[newMesh.halfEdges[he].head].position;
                     mesh->vertices[mesh->halfEdges[he].head].position += lambda*delta;
                 }
-                for (int i=0; i<(mesh->vertices).size(); i++){
-                    int he = (mesh->vertices[i]).halfEdge;
+                newMesh = *mesh;
+                for (int i=0; i<(newMesh.vertices).size(); i++){
+                    int he = (newMesh.vertices[i]).halfEdge;
                     glm::vec3 sumNeighbours = glm::vec3(0.0,0.0,0.0);
                     int neighbours=0;
                     do {
                     // do something with h->head;
-                        glm::vec3 v1 = mesh->vertices[mesh->halfEdges[he].head].position;
-                        glm::vec3 v2 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].head].position;
-                        glm::vec3 v3 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].halfEdgeNext].head].position;
+                        glm::vec3 v1 = newMesh.vertices[newMesh.halfEdges[he].head].position;
+                        glm::vec3 v2 = newMesh.vertices[newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].head].position;
+                        glm::vec3 v3 = newMesh.vertices[newMesh.halfEdges[newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].halfEdgeNext].head].position;
                         sumNeighbours += v2;
                         sumNeighbours += v3;
-                        he = mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].halfEdgePair;  // h = h->next->pair;
+                        he = newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].halfEdgePair;  // h = h->next->pair;
                         neighbours++;
-                    } while (he != (mesh->vertices[i]).halfEdge);
+                    } while (he != (newMesh.vertices[i]).halfEdge);
                     sumNeighbours /= (2.0*neighbours);
-                    glm::vec3 delta = sumNeighbours - mesh->vertices[mesh->halfEdges[he].head].position;
+                    glm::vec3 delta = sumNeighbours - newMesh.vertices[newMesh.halfEdges[he].head].position;
                     mesh->vertices[mesh->halfEdges[he].head].position += lambda*mu;
                 }
             }
