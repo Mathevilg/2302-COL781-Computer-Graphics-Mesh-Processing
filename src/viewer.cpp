@@ -807,8 +807,79 @@ namespace COL781 {
             mesh->halfEdges[leftRight].halfEdgePair = rightLeft;
         }
         void Mesh::splitEdge(Mesh* mesh, int halfEdgeIndex, float ratio){
+            Vertex v1,v2,v3,v4,v5,v6;
+            HalfEdge e1,e2,e3,e4,e5,e6;
+            Face f1,f2;
+            glm::vec3 pos1 = mesh->vertices[mesh->halfEdges[halfEdgeIndex].head].position;
+            glm::vec3 pos2 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].head].position;
+            glm::vec3 posleft = mesh->vertices[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].head].position;
+            glm::vec3 posright = mesh->vertices[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].halfEdgeNext].head].position;
+            glm::vec3 mid = (pos1+pos2);
+            mid/=2.0;
+            mesh->vertices[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].halfEdgeNext].head].position = mid;
+            mesh->vertices[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].head].position = mid;
+            v1.position = pos2;
+            v2.position = pos1;
+            v3.position = posleft;
+            v4.position = pos1;
+            v5.position = pos2;
+            v6.position = posright;
+            int currLen = mesh->vertices.size();
+            int currFaceLen = mesh->faces.size();
+            e1.head = currLen+1;
+            e2.head = currLen+2;
+            e3.head = currLen;
+            e4.head = currLen+4;
+            e5.head = currLen+5;
+            e6.head = currLen+3;
+            e1.halfEdgeNext = currLen+1;
+            e2.halfEdgeNext = currLen+2;
+            e3.halfEdgeNext = currLen;
+            e4.halfEdgeNext = currLen+4;
+            e5.halfEdgeNext = currLen+5;
+            e6.halfEdgeNext = currLen+3;
+            f1.halfEdge = currLen;
+            f2.halfEdge = currLen+3;
+            e1.left = currFaceLen;
+            e2.left = currFaceLen;
+            e3.left = currFaceLen;
+            e4.left = currFaceLen+1;
+            e5.left = currFaceLen+1;
+            e6.left = currFaceLen+1;
+            e1.halfEdgePair = currLen+3;
+            e2.halfEdgePair = mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].halfEdgePair;
+            mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].halfEdgePair].halfEdgePair = currLen+1;
+            e3.halfEdgePair = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].halfEdgeNext].halfEdgePair;
+            mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].halfEdgeNext].halfEdgePair].halfEdgePair = currLen+2;
+            e4.halfEdgePair = currLen;
+            e5.halfEdgePair = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].halfEdgeNext].halfEdgePair;
+            mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].halfEdgeNext].halfEdgePair].halfEdgePair = currLen+4;
+            e6.halfEdgePair = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].halfEdgeNext].halfEdgeNext].halfEdgePair;
+            mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].halfEdgeNext].halfEdgeNext].halfEdgePair].halfEdgePair = currLen+5;
+            v1.halfEdge = currLen+2;
+            v2.halfEdge = currLen;
+            v3.halfEdge = currLen+1;
+            v4.halfEdge = currLen+5;
+            v5.halfEdge = currLen+3;
+            v6.halfEdge = currLen+4;
+            mesh->vertices.push_back(v1);
+            mesh->vertices.push_back(v2);
+            mesh->vertices.push_back(v3);
+            mesh->vertices.push_back(v4);
+            mesh->vertices.push_back(v5);
+            mesh->vertices.push_back(v6);
+            mesh->halfEdges.push_back(e1);
+            mesh->halfEdges.push_back(e2);
+            mesh->halfEdges.push_back(e3);
+            mesh->halfEdges.push_back(e4);
+            mesh->halfEdges.push_back(e5);
+            mesh->halfEdges.push_back(e6);
+            mesh->faces.push_back(f1);
+            mesh->faces.push_back(f2);
+            std::cout<<mesh->halfEdges.size()<< " " <<mesh->vertices.size()<<"\n";
         }
         void Mesh::collapseEdge(Mesh* mesh, int halfEdgeIndex){
+        
         }
         bool Mesh::testMeshConnectivity(Mesh* mesh){return true;}
 
