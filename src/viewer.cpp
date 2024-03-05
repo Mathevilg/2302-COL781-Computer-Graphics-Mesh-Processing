@@ -916,11 +916,182 @@ namespace COL781 {
         // 
 
         // part 2.3
-        /* Function to apply loopSubdivision on a given mesh. 
-           Algo: 1. Split all the original edges of the mesh, then flip every edge that connects an original vertex to a newly created vertex. After that, update all the vertex positions.
-                 2. It’s probably better to precompute the updated vertex positions before doing any splits, because it’s easier to find the relevant neighbourhoods.*/
+        
         void Mesh::loopSubdivision(Mesh* mesh){
-            
+            std::map<int, std::pair<std::pair<int, int>,std::pair<int, int>>> edgeMap;
+            std::vector<Vertex> newVertices;
+            std::vector<int> oldVertices;
+            std::vector<HalfEdge> newEdges;
+            std::vector<Face> newFaces;
+
+            //Splitting to create new vertices
+            for(auto face:mesh->faces){
+                HalfEdge e1 = mesh->halfEdges[face.halfEdge];
+                HalfEdge e2 = mesh->halfEdges[e1.halfEdgeNext];
+                HalfEdge e3 = mesh->halfEdges[e2.halfEdgeNext];
+                
+                Vertex v1 = mesh->vertices[e1.head];
+                Vertex v2 = mesh->vertices[e2.head];
+                Vertex v3 = mesh->vertices[e3.head];
+
+                glm::vec3 newPos1 = (v1.position+v2.position);
+                glm::vec3 newPos2 = (v2.position+v3.position);
+                glm::vec3 newPos3 = (v3.position+v1.position);
+                newPos1/=2.0;newPos2/=2.0;newPos3/=2.0;
+
+                Vertex v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15;
+                HalfEdge e4,e5,e6,e7,e8,e9,e10,e11,e12,e13,e14,e15;
+                Face f1,f2,f3,f4;
+
+                v4.position = v9.position = v14.position = newPos3;
+                v6.position = v7.position = v11.position = newPos1;
+                v8.position = v10.position = v15.position = newPos2;
+                v5.position = v1.position; v12.position = v2.position; v13.position = v3.position;
+                
+                int start_index = newEdges.size();
+                v4.index = start_index; v5.index = start_index+1; v6.index = start_index+2; v7.index = start_index+3; 
+                v8.index = start_index+4; v9.index = start_index+5; v10.index = start_index+6; v11.index = start_index+7;
+                v12.index = start_index+8; v13.index = start_index+9; v14.index = start_index+10; v15.index = start_index+11;
+
+                oldVertices.push_back(v5.index);
+                oldVertices.push_back(v12.index);
+                oldVertices.push_back(v13.index);
+
+                e4.index = start_index; e5.index = start_index+1; e6.index = start_index+2; e7.index = start_index+3;
+                e8.index = start_index+4; e9.index = start_index+5; e10.index = start_index+6; e11.index = start_index+7;
+                e12.index = start_index+8; e13.index = start_index+9; e14.index = start_index+10; e15.index = start_index+11;
+
+                v4.halfEdge = e4.index; v5.halfEdge = e5.index; v6.halfEdge = e6.index; v7.halfEdge = e7.index; v8.halfEdge = e8.index; v9.halfEdge = e9.index;
+                v10.halfEdge = e10.index; v11.halfEdge = e11.index; v12.halfEdge = e12.index; v13.halfEdge = e13.index; v14.halfEdge = e14.index; v15.halfEdge = e15.index;
+
+                f1.index = start_index; f2.index = start_index+1; f3.index = start_index+2; f4.index = start_index+3;
+                f1.halfEdge = e4.index; f2.halfEdge = e7.index; f3.halfEdge = e10.index; f4.halfEdge = e13.index;
+
+                e4.head = v4.index; e5.head = v5.index; e6.head = v6.index; e7.head = v7.index; e8.head = v8.index; e9.head = v9.index;
+                e10.head = v10.index; e11.head = v11.index; e12.head = v12.index; e13.head = v13.index; e14.head = v14.index; e15.head = v15.index;
+
+                e4.halfEdgeNext = e5.index; e5.halfEdgeNext = e6.index; e6.halfEdgeNext = e4.index;
+                e7.halfEdgeNext = e8.index; e8.halfEdgeNext = e9.index; e9.halfEdgeNext = e7.index;
+                e10.halfEdgeNext = e11.index; e11.halfEdgeNext = e12.index; e12.halfEdgeNext = e10.index;
+                e13.halfEdgeNext = e14.index; e14.halfEdgeNext = e15.index; e15.halfEdgeNext = e13.index;
+
+                e4.left = f1.index; e5.left = f1.index; e6.left = f1.index; e7.left = f2.index; e8.left = f2.index; e9.left = f2.index;
+                e10.left = f3.index; e11.left = f3.index; e12.left = f3.index; e13.left = f4.index; e14.left = f4.index; e15.left = f4.index;
+
+                e4.halfEdgePair = e7.index; e7.halfEdgePair = e4.index; 
+                e8.halfEdgePair = e11.index; e11.halfEdgePair = e8.index;
+                e9.halfEdgePair = e15.index; e15.halfEdgePair = e9.index;
+
+                newVertices.push_back(v4); newVertices.push_back(v5); newVertices.push_back(v6); newVertices.push_back(v7); newVertices.push_back(v8); newVertices.push_back(v9);
+                newVertices.push_back(v10); newVertices.push_back(v11); newVertices.push_back(v12); newVertices.push_back(v13); newVertices.push_back(v14); newVertices.push_back(v15);
+                newEdges.push_back(e4); newEdges.push_back(e5); newEdges.push_back(e6); newEdges.push_back(e7); newEdges.push_back(e8); newEdges.push_back(e9);
+                newEdges.push_back(e10); newEdges.push_back(e11); newEdges.push_back(e12); newEdges.push_back(e13); newEdges.push_back(e14); newEdges.push_back(e15);
+
+                newFaces.push_back(f1); newFaces.push_back(f2); newFaces.push_back(f3); newFaces.push_back(f4);
+
+                if(edgeMap.find(e1.halfEdgePair)!=edgeMap.end()){
+                    std::pair<int,int> pair1 = edgeMap[e1.halfEdgePair].first;
+                    std::pair<int,int> pair2 = edgeMap[e1.halfEdgePair].second;
+                    if(pair1.first == v1.index){
+                        e5.halfEdgePair = pair1.second;
+                        newEdges[pair1.second].halfEdgePair = e5.index;
+                        e14.halfEdgePair = pair2.second;
+                        newEdges[pair2.second].halfEdgePair = e14.index;
+                    }
+                    else{
+                        e5.halfEdgePair = pair2.second;
+                        newEdges[pair2.second].halfEdgePair = e5.index;
+                        e14.halfEdgePair = pair1.second;
+                        newEdges[pair1.second].halfEdgePair = e14.index;
+                    }
+                }
+                else{
+                    edgeMap[e1.index] = {{v1.index,e5.index},{v3.index,e14.index}};
+                }
+
+                if(edgeMap.find(e2.halfEdgePair)!=edgeMap.end()){
+                    std::pair<int,int> pair1 = edgeMap[e2.halfEdgePair].first;
+                    std::pair<int,int> pair2 = edgeMap[e2.halfEdgePair].second;
+                    if(pair1.first == v1.index){
+                        e6.halfEdgePair = pair1.second;
+                        newEdges[pair1.second].halfEdgePair = e6.index;
+                        e12.halfEdgePair = pair2.second;
+                        newEdges[pair2.second].halfEdgePair = e12.index;
+                    }
+                    else{
+                        e6.halfEdgePair = pair2.second;
+                        newEdges[pair2.second].halfEdgePair = e6.index;
+                        e12.halfEdgePair = pair1.second;
+                        newEdges[pair1.second].halfEdgePair = e12.index;
+                    }
+                }
+                else{
+                    edgeMap[e2.index] = {{v1.index,e6.index},{v2.index,e12.index}};
+                }
+
+                if(edgeMap.find(e3.halfEdgePair)!=edgeMap.end()){
+                    std::pair<int,int> pair1 = edgeMap[e3.halfEdgePair].first;
+                    std::pair<int,int> pair2 = edgeMap[e3.halfEdgePair].second;
+                    if(pair1.first == v2.index){
+                        e10.halfEdgePair = pair1.second;
+                        newEdges[pair1.second].halfEdgePair = e10.index;
+                        e13.halfEdgePair = pair2.second;
+                        newEdges[pair2.second].halfEdgePair = e13.index;
+                    }
+                    else{
+                        e10.halfEdgePair = pair2.second;
+                        newEdges[pair2.second].halfEdgePair = e10.index;
+                        e13.halfEdgePair = pair1.second;
+                        newEdges[pair1.second].halfEdgePair = e13.index;
+                    }
+                }
+                else{
+                    edgeMap[e3.index] = {{v2.index,e10.index},{v3.index,e13.index}};
+                }
+            }
+
+            mesh->vertices = newVertices;
+            mesh->halfEdges = newEdges;
+            mesh->faces = newFaces;
+
+            //Updating the old vertices
+            for(auto vertex:oldVertices){
+                glm::vec3 newPos = glm::vec3(0.0,0.0,0.0);
+                int count = 0;
+                HalfEdge he = mesh->halfEdges[mesh->vertices[vertex].halfEdge];
+                bool f =0;
+                do {
+                    if(mesh->halfEdges[he.halfEdgeNext].halfEdgePair==-1){
+                        f = 1;
+                        break;
+                    }
+                    HalfEdge nextEdge = mesh->halfEdges[he.halfEdgeNext];
+                    newPos+=mesh->vertices[nextEdge.head].position;
+                    he = mesh->halfEdges[nextEdge.halfEdgePair];
+                    count++;
+                }
+                while (he.index != mesh->halfEdges[mesh->vertices[vertex].halfEdge].index);
+
+                if(f){
+                    he = mesh->halfEdges[mesh->vertices[vertex].halfEdge];
+                    while(he.halfEdgePair!=-1){
+                        HalfEdge pairEdge = mesh->halfEdges[he.halfEdgePair];
+                        newPos+=mesh->vertices[pairEdge.head].position;
+                        he = mesh->halfEdges[mesh->halfEdges[pairEdge.halfEdgeNext].halfEdgeNext];
+                        count++;
+                    }
+                }
+
+                float x = (3.0+2.0*cos(glm::two_pi<float>()/count));
+                float a = (x*x)/32.0f - 0.25f;
+                float b = (1-a)/count;
+                
+                newPos*=a;
+                newPos+=mesh->vertices[vertex].position*b;
+                mesh->vertices[vertex].position = newPos;
+            }
+
+
         }
 
     }

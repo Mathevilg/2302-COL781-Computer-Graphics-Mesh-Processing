@@ -75,7 +75,8 @@ namespace COL781 {
 
         class HalfEdge {
         public:
-            int halfEdgePair, halfEdgeNext;
+            int halfEdgePair = -1;
+            int halfEdgeNext;
             int head;
             int left;
             int index;
