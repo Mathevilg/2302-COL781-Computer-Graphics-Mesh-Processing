@@ -879,9 +879,29 @@ namespace COL781 {
             std::cout<<mesh->halfEdges.size()<< " " <<mesh->vertices.size()<<"\n";
         }
         void Mesh::collapseEdge(Mesh* mesh, int halfEdgeIndex){
-        
+            glm::vec3 pos1 = mesh->vertices[mesh->halfEdges[halfEdgeIndex].head].position;
+            glm::vec3 pos2 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].head].position;
+            glm::vec3 mid = pos1+pos2;
+            mid/=2.0;
+            
+            int v1 = mesh->halfEdges[halfEdgeIndex].head;
+            int v2 = mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].head;
+            int he = (mesh->vertices[v1]).halfEdge;
+            do {
+                mesh->vertices[mesh->halfEdges[he].head].position = mid;
+                he = mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].halfEdgePair;  // h = h->next->pair;
+            } while (he != (mesh->vertices[v1]).halfEdge);
+
+            he = (mesh->vertices[v2]).halfEdge;
+            do {
+                mesh->vertices[mesh->halfEdges[he].head].position = mid;
+                he = mesh->halfEdges[mesh->halfEdges[he].halfEdgeNext].halfEdgePair;  // h = h->next->pair;
+            } while (he != (mesh->vertices[v2]).halfEdge);
+
         }
         bool Mesh::testMeshConnectivity(Mesh* mesh){return true;}
+        // invariants : vertices, edges, faces count
+        // 
 
     }
 }
