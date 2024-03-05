@@ -1196,8 +1196,8 @@ namespace COL781 {
                 float a = (x*x)/32.0f - 0.25f;
                 float b = (1-a)/count;
                 
-                newPos*=a;
-                newPos+=mesh->vertices[vertex].position*b;
+                newPos*=b;
+                newPos+=mesh->vertices[vertex].position*a;
                 mesh->vertices[vertex].position = newPos;
             }
 
