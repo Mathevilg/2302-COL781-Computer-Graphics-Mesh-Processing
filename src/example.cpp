@@ -22,10 +22,10 @@ int main() {
     };
 
     V::Viewer v;
-    int rows = 100, columns = 100;
+    int rows = 10, columns = 10;
     V::Mesh mesh;
-    // mesh = *mesh.createSquare(rows, columns);
-    mesh = *mesh.createSphere(360,360);
+    mesh = *mesh.createSquare(rows, columns);
+    // mesh = *mesh.createSphere(360,360);
     if (!v.initialize("Mesh viewer", 640, 480)) {
         return EXIT_FAILURE;
     }

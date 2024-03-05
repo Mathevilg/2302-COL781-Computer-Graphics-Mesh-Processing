@@ -135,7 +135,8 @@ namespace COL781 {
 
             // Part 2.3
             /*Function to apply loop subdivision on the mesh. */
-            void loopSubdivision(Mesh* mesh);
+            void loopSubdivisionStep(Mesh* mesh);
+            void loopSubdivision(Mesh* mesh, int numSteps);
         };
 
         

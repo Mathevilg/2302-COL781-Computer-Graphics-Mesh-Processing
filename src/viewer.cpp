@@ -206,21 +206,6 @@ namespace COL781 {
 
         Mesh* Mesh::createSquare(int rows, int columns){
             Mesh* mesh = new Mesh();
-        
-            // Step 1: Initialize vertices
-            for (int i = 0; i <= rows; i++) {
-                for (int j = 0; j <= columns; j++) {
-                    Vertex v;
-                    v.position = glm::vec3((float)j / columns, (float)i / rows, 0.0f);
-                    v.colour = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-                    v.normal = glm::vec3(0.0f, 0.0f, 1.0f);
-                    v.index = i * (columns + 1) + j;
-                    
-                    mesh->vertices.push_back(v);
-                    mesh->positions.push_back(v.position);
-                    mesh->vertexNormals.push_back(v.normal);
-                }
-            }
 
             // Step 2: Initialize triangles
             for (int i = 0; i < rows; i++) {
@@ -228,37 +213,33 @@ namespace COL781 {
                     Face upperTriangle;
                     Face lowerTriangle;
                     HalfEdge e1, e2, e3, e4, e5, e6;
-                    Vertex v1, v2, v3, v4;
-                    v1 = mesh->vertices[i * (columns + 1) + j];
-                    v2 = mesh->vertices[i * (columns + 1) + j + 1];
-                    v3 = mesh->vertices[(i + 1) * (columns + 1) + j + 1];
-                    v4 = mesh->vertices[(i + 1) * (columns + 1) + j];
+                    Vertex v1, v2, v3, v4, v5, v6;
+
+                    v1.position = glm::vec3((float)(j+1) / columns, (float)i / rows, 0.0f);
+                    v2.position = glm::vec3((float)j / columns, (float)i / rows, 0.0f);
+                    v3.position = glm::vec3((float)j / columns, (float)(i+1) / rows, 0.0f);
+                    v4.position = glm::vec3((float)j / columns, (float)(i+1) / rows, 0.0f);
+                    v5.position = glm::vec3((float)(j+1) / columns, (float)(i+1) / rows, 0.0f);
+                    v6.position = glm::vec3((float)(j+1) / columns, (float)i / rows, 0.0f);
+
+                    v1.normal = glm::vec3(0.0f, 0.0f, 1.0f); v2.normal = glm::vec3(0.0f, 0.0f, 1.0f); v3.normal = glm::vec3(0.0f, 0.0f, 1.0f);
+                    v4.normal = glm::vec3(0.0f, 0.0f, 1.0f); v5.normal = glm::vec3(0.0f, 0.0f, 1.0f); v6.normal = glm::vec3(0.0f, 0.0f, 1.0f);
+
 
                     int start_index = mesh->halfEdges.size();
-                    e1.head = v2.index; e1.index = start_index;
-                    e2.head = v1.index; e2.index = start_index + 1;
-                    e3.head = v4.index; e3.index = start_index + 2;
+
+                    v1.index = start_index; v2.index = start_index + 1; v3.index = start_index + 2;
+                    v4.index = start_index + 3; v5.index = start_index + 4; v6.index = start_index + 5;
+
+                    e1.head = v1.index; e1.index = start_index;
+                    e2.head = v2.index; e2.index = start_index + 1;
+                    e3.head = v3.index; e3.index = start_index + 2;
                     e4.head = v4.index; e4.index = start_index + 3;
-                    e5.head = v3.index; e5.index = start_index + 4;
-                    e6.head = v2.index; e6.index = start_index + 5;
+                    e5.head = v5.index; e5.index = start_index + 4;
+                    e6.head = v6.index; e6.index = start_index + 5;
 
-                    if(i==0){
-                        v1.halfEdge = e2.index;
-                    }
-                    if(j==columns-1){
-                        v2.halfEdge = e6.index;
-                    }
-
-                    if(i==rows-1){
-                        if(j==0){
-                            v4.halfEdge = e3.index;
-                        }
-                        v3.halfEdge = e5.index;
-                    }
-                    else{
-                        v4.halfEdge = e3.index;
-                    }
-                    
+                    v1.halfEdge = e1.index; v2.halfEdge = e2.index; v3.halfEdge = e3.index;
+                    v4.halfEdge = e4.index; v5.halfEdge = e5.index; v6.halfEdge = e6.index;
 
                     upperTriangle.index = 2*(i*columns + j);
                     lowerTriangle.index = 2*(i*columns + j) + 1;
@@ -274,28 +255,32 @@ namespace COL781 {
                     e4.halfEdgePair = e1.index;
                     e1.halfEdgePair = e4.index;
 
-                    mesh->halfEdges.push_back(e1);
-                    mesh->halfEdges.push_back(e2);
-                    mesh->halfEdges.push_back(e3);
-                    mesh->halfEdges.push_back(e4);
-                    mesh->halfEdges.push_back(e5);
-                    mesh->halfEdges.push_back(e6);
+                    mesh->halfEdges.push_back(e1); mesh->vertices.push_back(v1);
+                    mesh->halfEdges.push_back(e2); mesh->vertices.push_back(v2);
+                    mesh->halfEdges.push_back(e3); mesh->vertices.push_back(v3);
+                    mesh->halfEdges.push_back(e4); mesh->vertices.push_back(v4);
+                    mesh->halfEdges.push_back(e5); mesh->vertices.push_back(v5);
+                    mesh->halfEdges.push_back(e6); mesh->vertices.push_back(v6);
 
                     if(i!=0 && j!=0){
-                        HalfEdge prevUp = mesh->halfEdges[mesh->halfEdges[mesh->faces[2*((i-1)*columns + j) + 1].halfEdge].halfEdgeNext];
-                        HalfEdge prevLeft = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->faces[2*(i*columns + j) - 1].halfEdge].halfEdgeNext].halfEdgeNext];
+                        Face upFace = mesh->faces[2*((i-1)*columns + j)];
+                        Face leftFace = mesh->faces[2*(i*columns + j) - 1];
+                        HalfEdge prevUp = mesh->halfEdges[mesh->halfEdges[upFace.halfEdge].halfEdgeNext];
+                        HalfEdge prevLeft = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[leftFace.halfEdge].halfEdgeNext].halfEdgeNext];
                         e2.halfEdgePair = prevUp.index;
                         prevUp.halfEdgePair = e2.index;
                         e3.halfEdgePair = prevLeft.index;
                         prevLeft.halfEdgePair = e3.index;
                     }
                     else if(i!=0){
-                        HalfEdge prevUp = mesh->halfEdges[mesh->halfEdges[mesh->faces[2*((i-1)*columns + j) + 1].halfEdge].halfEdgeNext];
+                        Face upFace = mesh->faces[2*((i-1)*columns + j)];
+                        HalfEdge prevUp = mesh->halfEdges[mesh->halfEdges[upFace.halfEdge].halfEdgeNext];
                         e2.halfEdgePair = prevUp.index;
                         prevUp.halfEdgePair = e2.index;
                     }
                     else if(j!=0){
-                        HalfEdge prevLeft = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->faces[2*(i*columns + j) - 1].halfEdge].halfEdgeNext].halfEdgeNext];
+                        Face leftFace = mesh->faces[2*(i*columns + j) - 1];
+                        HalfEdge prevLeft = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[leftFace.halfEdge].halfEdgeNext].halfEdgeNext];
                         e3.halfEdgePair = prevLeft.index;
                         prevLeft.halfEdgePair = e3.index;
                     }
@@ -917,7 +902,7 @@ namespace COL781 {
 
         // part 2.3
         
-        void Mesh::loopSubdivision(Mesh* mesh){
+        void Mesh::loopSubdivisionStep(Mesh* mesh){
             std::map<int, std::pair<std::pair<int, int>,std::pair<int, int>>> edgeMap;
             std::vector<Vertex> newVertices;
             std::vector<int> oldVertices;
@@ -1094,5 +1079,11 @@ namespace COL781 {
 
         }
 
+        void Mesh::loopSubdivision(Mesh* mesh, int numSteps){
+            for(int i=0;i<numSteps;i++){
+                loopSubdivisionStep(mesh);
+            }
+        }
+        
     }
 }
