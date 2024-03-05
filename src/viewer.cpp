@@ -937,9 +937,77 @@ namespace COL781 {
             } while (he != (mesh->vertices[v2]).halfEdge);
 
         }
-        bool Mesh::testMeshConnectivity(Mesh* mesh){return true;}
-        // invariants : vertices, edges, faces count
-        // 
+
+
+        bool Mesh::testMeshConnectivity(Mesh* mesh){
+            // Vertex edge connectivity
+            for (int i=0; i<mesh->vertices.size(); i++){
+                if (mesh->halfEdges[mesh->vertices[i].halfEdge].head != i) {
+                    std::cout << "Vertex-Edge connectivity violated\n";
+                    return false;
+                }
+            }
+            for (int i=0; i<mesh->halfEdges.size(); i++){
+                if (mesh->vertices[mesh->halfEdges[i].head].halfEdge != i) {
+                    std::cout << "Vertex-Edge connectivity violated\n";
+                    return false;
+                }
+            }
+
+            // Edge face connectivity
+            for (int i=0; i<mesh->faces.size(); i++){
+                if (mesh->halfEdges[mesh->faces[i].halfEdge].left != i) {
+                    std::cout << "Edge-Face connectivity violated\n";
+                    return false;
+                }
+            }
+            for (int i=0; i<mesh->halfEdges.size(); i++){
+                if (mesh->faces[mesh->halfEdges[i].left].halfEdge != i) {
+                    std::cout << "Edge-Face connectivity violated\n";
+                    return false;
+                }
+            }
+
+            // Half edges connectivity
+            for (int i=0; i<mesh->halfEdges.size(); i++){
+                int e1 = mesh->halfEdges[i].halfEdgeNext;
+                int e2 = mesh->halfEdges[e1].halfEdgeNext;
+                int e3 = mesh->halfEdges[e2].halfEdgeNext;
+                if (e3!=i) {
+                    std::cout << "Half edges connectivity violated\n";
+                    return false;
+                }
+            }
+
+            // Opposite half edges connectivity
+            for (int i=0; i<mesh->halfEdges.size(); i++){
+                int e1 = mesh->halfEdges[i].halfEdgePair;
+                if (e1==-1) continue;
+                int e2 = mesh->halfEdges[e1].halfEdgePair;
+                if (e2!=i) {
+                    std::cout << "Opposite half edges connectivity violated\n";
+                    return false;
+                }
+            }
+
+            // Consistent orientation
+            for (int i=0; i<mesh->halfEdges.size(); i++){
+                int pair = mesh->halfEdges[i].halfEdgePair;
+                if (pair==-1) continue;
+                glm::vec3 pos1 = mesh->vertices[mesh->halfEdges[i].head].position;
+                glm::vec3 pos2 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[i].halfEdgeNext].halfEdgeNext].head].position;
+                glm::vec3 pos3 = mesh->vertices[mesh->halfEdges[pair].head].position;
+                glm::vec3 pos4 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[pair].halfEdgeNext].halfEdgeNext].head].position;
+                if (pos1!=pos4 || pos2!=pos3) {
+                    std::cout << "Inconsistent orientation\n";
+                    return false;
+                }
+            }
+
+            // Boundary handling
+            return true;
+        }
+
 
         // part 2.3
         
