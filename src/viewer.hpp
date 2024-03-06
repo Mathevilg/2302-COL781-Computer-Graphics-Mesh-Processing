@@ -90,7 +90,7 @@ namespace COL781 {
             int halfEdge;
             int index;
             // void traverseNeighbouringTriangles(Vertex* v);
-            void traverseNeighbouringTriangles(std::vector<HalfEdge> &halfEdges, Vertex* v);
+            void traverseNeighbouringTriangles(std::vector<Vertex> &vertices, std::vector<HalfEdge> &halfEdges, Vertex* v);
         };
 
         class Face {

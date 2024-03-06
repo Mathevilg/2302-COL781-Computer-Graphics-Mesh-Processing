@@ -169,27 +169,31 @@ namespace COL781 {
         }
 
         // Part 1.1 and 1.2
-        
-
-        void Vertex::traverseNeighbouringTriangles(std::vector<HalfEdge> &halfEdges, Vertex* v){
-            HalfEdge h = halfEdges[v->halfEdge];
-            bool f = 0;
+        void Vertex::traverseNeighbouringTriangles(std::vector<Vertex> &vertices, std::vector<HalfEdge> &halfEdges, Vertex* v){
+            int count = 0;
+            HalfEdge he = halfEdges[v->halfEdge];
+            bool f =0;
             do {
-                // do something with h->left;
-                if(halfEdges[h.halfEdgeNext].halfEdgePair==-1){
+                count++;
+                // std::cout<<vertices[he.head].position.x<<" "<<vertices[he.head].position.y<<" "<<vertices[he.head].position.z<<"\n";
+                if(halfEdges[he.halfEdgeNext].halfEdgePair==-1){
                     f = 1;
                     break;
                 }
-                h = halfEdges[halfEdges[h.halfEdgeNext].halfEdgePair];
+                he = halfEdges[halfEdges[he.halfEdgeNext].halfEdgePair];
             }
-            while (h.index != halfEdges[v->halfEdge].index);
+            while (he.index != halfEdges[v->halfEdge].index);
 
             if(f){
-                h = halfEdges[v->halfEdge];
-                while(h.halfEdgePair!=-1){
-                    h = halfEdges[halfEdges[halfEdges[h.halfEdgePair].halfEdgeNext].halfEdgeNext];
+                he = halfEdges[v->halfEdge];
+                while(he.halfEdgePair!=-1){
+                    HalfEdge pairEdge = halfEdges[he.halfEdgePair];
+                    he = halfEdges[halfEdges[pairEdge.halfEdgeNext].halfEdgeNext];
+                    count++;
                 }
+                count++;
             }
+            // std::cout<<count<<std::endl;
         }
 
         void Mesh::createScene(Viewer* viewer){   
@@ -206,7 +210,6 @@ namespace COL781 {
         Mesh* Mesh::createSquare(int rows, int columns){
             Mesh* mesh = new Mesh();
 
-            // Step 2: Initialize triangles
             for (int i = 0; i < rows; i++) {
                 for (int j = 0; j < columns; j++) {
                     Face upperTriangle;
@@ -223,7 +226,6 @@ namespace COL781 {
 
                     v1.normal = glm::vec3(0.0f, 0.0f, 1.0f); v2.normal = glm::vec3(0.0f, 0.0f, 1.0f); v3.normal = glm::vec3(0.0f, 0.0f, 1.0f);
                     v4.normal = glm::vec3(0.0f, 0.0f, 1.0f); v5.normal = glm::vec3(0.0f, 0.0f, 1.0f); v6.normal = glm::vec3(0.0f, 0.0f, 1.0f);
-
 
                     int start_index = mesh->halfEdges.size();
 
@@ -254,13 +256,14 @@ namespace COL781 {
                     e4.halfEdgePair = e1.index;
                     e1.halfEdgePair = e4.index;
 
-
                     if(i!=0 && j!=0){
                         Face upFace = mesh->faces[lowerTriangle.index-2*columns];
                         Face leftFace = mesh->faces[upperTriangle.index - 1];
+
                         HalfEdge prevUp = mesh->halfEdges[mesh->halfEdges[upFace.halfEdge].halfEdgeNext];
                         HalfEdge prevLeft = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[leftFace.halfEdge].halfEdgeNext].halfEdgeNext];
                         e2.halfEdgePair = prevUp.index;
+
                         mesh->halfEdges[prevUp.index].halfEdgePair = e2.index;
                         e3.halfEdgePair = prevLeft.index;
                         mesh->halfEdges[prevLeft.index].halfEdgePair = e3.index;
@@ -303,9 +306,6 @@ namespace COL781 {
         Mesh* Mesh::createSphere(int longitudes, int latitudes){
             Mesh* mesh = new Mesh();
 
-            // Step 1: Initialize vertice
-            
-            // Step 2: Initialize triangles
             for (int i = 1; i < latitudes-1; i++) {
                 for (int j = 0; j < longitudes; j++) {
                     Face upperTriangle;
@@ -313,7 +313,6 @@ namespace COL781 {
         
                     HalfEdge e1, e2, e3, e4, e5, e6;
                     Vertex v1, v2, v3, v4, v5, v6;
-
 
                     v1.position = glm::vec3(std::sin(phi(i,latitudes)) * std::cos(theta(j+1,longitudes)), std::sin(phi(i,latitudes)) * std::sin(theta(j+1,longitudes)), std::cos(phi(i,latitudes)));
                     v2.position = glm::vec3(std::sin(phi(i,latitudes)) * std::cos(theta(j,longitudes)), std::sin(phi(i,latitudes)) * std::sin(theta(j,longitudes)), std::cos(phi(i,latitudes)));
@@ -355,8 +354,6 @@ namespace COL781 {
                     e4.halfEdgePair = e1.index;
                     e1.halfEdgePair = e4.index;
         
-        
-        
                     if (i != 1 && j!=0) {
                         Face upFace = mesh->faces[lowerTriangle.index - 2*longitudes];
                         Face leftFace = mesh->faces[upperTriangle.index - 1];
@@ -392,7 +389,6 @@ namespace COL781 {
                         e2.halfEdgePair = prevUp.index;
                         mesh->halfEdges[prevUp.index].halfEdgePair = e2.index;
                     }
-        
         
                     mesh->halfEdges.push_back(e1); mesh->vertices.push_back(v1);
                     mesh->halfEdges.push_back(e2); mesh->vertices.push_back(v2);
@@ -437,7 +433,7 @@ namespace COL781 {
                 v4.halfEdge = e4.index; v5.halfEdge = e5.index; v6.halfEdge = e6.index;
 
                 topTriangle.index = mesh->faces.size();
-                bottomTriangle.index = mesh->faces.size()+1; //2*(latitudes-2)*longitudes+2*j + 1;
+                bottomTriangle.index = mesh->faces.size()+1;
                 topTriangle.halfEdge = e3.index;
                 bottomTriangle.halfEdge = e6.index;
 
@@ -447,7 +443,6 @@ namespace COL781 {
                 e4.left = bottomTriangle.index; e4.halfEdgeNext = e5.index;
                 e5.left = bottomTriangle.index; e5.halfEdgeNext = e6.index;
                 e6.left = bottomTriangle.index; e6.halfEdgeNext = e4.index;
-
 
                 if(latitudes==2){
                     e2.halfEdgePair = e5.index;
@@ -459,9 +454,11 @@ namespace COL781 {
                         HalfEdge prevLeftTop = mesh->halfEdges[topLeftFace.halfEdge];
                         e1.halfEdgePair = prevLeftTop.index;
                         mesh->halfEdges[prevLeftTop.index].halfEdgePair = e1.index;
+
                         HalfEdge prevLeftBottom = mesh->halfEdges[mesh->halfEdges[bottomLeftFace.halfEdge].halfEdgeNext];
                         e6.halfEdgePair = prevLeftBottom.index;
                         mesh->halfEdges[prevLeftBottom.index].halfEdgePair = e6.index;
+
                         if(j==longitudes-1){
                             HalfEdge prevRightTop = mesh->halfEdges[0];
                             e3.halfEdgePair = prevRightTop.index;
@@ -491,9 +488,11 @@ namespace COL781 {
                         HalfEdge prevLeftTop = mesh->halfEdges[topLeftFace.halfEdge];
                         e1.halfEdgePair = prevLeftTop.index;
                         mesh->halfEdges[prevLeftTop.index].halfEdgePair = e1.index;
+
                         HalfEdge prevLeftBottom = mesh->halfEdges[mesh->halfEdges[bottomLeftFace.halfEdge].halfEdgeNext];
                         e6.halfEdgePair = prevLeftBottom.index;
                         mesh->halfEdges[prevLeftBottom.index].halfEdgePair = e6.index;
+
                         if(j==longitudes-1){
                             HalfEdge prevRightTop = mesh->halfEdges[mesh->halfEdges[mesh->faces[topTriangle.index - 2*(longitudes-1)].halfEdge].halfEdgeNext];
                             e3.halfEdgePair = prevRightTop.index;
@@ -581,9 +580,9 @@ namespace COL781 {
                     Face f;
                     HalfEdge e1,e2,e3;
                     Vertex v1, v2, v3;
-                    e1.index = edgeCount;
-                    e2.index = edgeCount+1;
-                    e3.index = edgeCount+2;
+                    e1.index = edgeCount; v1.index = vertexCount;
+                    e2.index = edgeCount+1; v2.index = vertexCount+1;
+                    e3.index = edgeCount+2; v3.index = vertexCount+2;
                     f.index = faceCount;
 
                     int i,j,k;
@@ -620,23 +619,23 @@ namespace COL781 {
                     //         (mesh.halfEdges)[edgeMap[std::pair<int,int>(std::min(i,k), std::max(i,k))]].halfEdgePair = e1.index;
                     //         e1.halfEdgePair = (mesh.halfEdges)[edgeMap[std::pair<int,int>(std::min(i,k), std::max(i,k))]].index;}
 
-                    f.halfEdge = edgeCount;
+                    f.halfEdge = v1.index;
 
-                    e1.halfEdgeNext = edgeCount+1;
-                    e2.halfEdgeNext = edgeCount+2;
-                    e3.halfEdgeNext = edgeCount;
+                    e1.halfEdgeNext = e2.index;
+                    e2.halfEdgeNext = e3.index;
+                    e3.halfEdgeNext = e1.index;
 
-                    e1.left = faceCount;
-                    e2.left = faceCount;
-                    e3.left = faceCount;
+                    e1.left = f.index;
+                    e2.left = f.index;
+                    e3.left = f.index;
 
-                    e1.head = vertexCount+1;
-                    e2.head = vertexCount+2;
-                    e3.head = vertexCount;
+                    e1.head = v1.index; e1.halfEdgePair = -1;
+                    e2.head = v2.index; e2.halfEdgePair = -1;
+                    e3.head = v3.index; e3.halfEdgePair = -1;
                     
-                    v1.halfEdge = edgeCount+2;
-                    v2.halfEdge = edgeCount;
-                    v3.halfEdge = edgeCount+1;
+                    v1.halfEdge = e1.index;
+                    v2.halfEdge = e2.index;
+                    v3.halfEdge = e3.index;
 
                     mesh.faces.push_back(f);
                     mesh.halfEdges.push_back(e1);
@@ -687,9 +686,9 @@ namespace COL781 {
             }
 
             // set all pairs index as -1 (done for implementing meshes with boundaries)
-            for (int i=0; i<mesh.halfEdges.size(); i++) {
-                mesh.halfEdges[i].halfEdgePair=-1;
-            }
+            // for (int i=0; i<mesh.halfEdges.size(); i++) {
+            //     mesh.halfEdges[i].halfEdgePair=-1;
+            // }
 
             // Now traverse the edges once agan to set the pairs
             for (int i=0; i<mesh.halfEdges.size(); i++) {
@@ -866,7 +865,7 @@ namespace COL781 {
             mesh->halfEdges[left].halfEdgePair = b;  
             mesh->halfEdges[rightLeft].halfEdgePair = leftRight;
             mesh->halfEdges[leftRight].halfEdgePair = rightLeft;
-        }
+        }    
         void Mesh::splitEdge(Mesh* mesh, int halfEdgeIndex, float ratio){
             Vertex v1,v2,v3,v4,v5,v6;
             HalfEdge e1,e2,e3,e4,e5,e6;
@@ -875,60 +874,71 @@ namespace COL781 {
             glm::vec3 pos2 = mesh->vertices[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].head].position;
             glm::vec3 posleft = mesh->vertices[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].head].position;
             glm::vec3 posright = mesh->vertices[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].halfEdgeNext].head].position;
-            glm::vec3 mid = (pos1+pos2);
-            mid/=2.0;
-            mesh->vertices[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].halfEdgeNext].head].position = mid;
-            mesh->vertices[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].head].position = mid;
-            v1.position = pos2;
-            v2.position = pos1;
-            v3.position = posleft;
-            v4.position = pos1;
-            v5.position = pos2;
-            v6.position = posright;
+            glm::vec3 mid = (ratio*pos1+(1-ratio)*pos2);
+
+            int topLeft = mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].halfEdgeNext;
+            int bottomLeft = mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].halfEdgeNext;
+            v1.position = mid;
+            v2.position = posleft;
+            v3.position = pos2;
+            v4.position = pos2;
+            v5.position = posright;
+            v6.position = mid;
+
+            int e7 = halfEdgeIndex; int e8 = mesh->halfEdges[e7].halfEdgeNext; int e9 = mesh->halfEdges[e8].halfEdgeNext;
+            int e10 = mesh->halfEdges[halfEdgeIndex].halfEdgePair; int e11 = mesh->halfEdges[e10].halfEdgeNext; int e12 = mesh->halfEdges[e11].halfEdgeNext;
+            int v7 = mesh->halfEdges[e7].head; int v8 = mesh->halfEdges[e8].head; int v9 = mesh->halfEdges[e9].head; 
+            int v10 = mesh->halfEdges[e10].head; int v11 = mesh->halfEdges[e11].head; int v12 = mesh->halfEdges[e12].head;
+            int f3 = mesh->halfEdges[e7].left; int f4 = mesh->halfEdges[e10].left;
+
+            mesh->vertices[v9].position = mid;
+            mesh->vertices[v10].position = mid;
+
             int currLen = mesh->vertices.size();
             int currFaceLen = mesh->faces.size();
-            e1.head = currLen+1;
-            e2.head = currLen+2;
-            e3.head = currLen;
-            e4.head = currLen+4;
-            e5.head = currLen+5;
-            e6.head = currLen+3;
-            e1.halfEdgeNext = currLen+1;
-            e2.halfEdgeNext = currLen+2;
-            e3.halfEdgeNext = currLen;
-            e4.halfEdgeNext = currLen+4;
-            e5.halfEdgeNext = currLen+5;
-            e6.halfEdgeNext = currLen+3;
-            f1.halfEdge = currLen;
-            f2.halfEdge = currLen+3;
-            e1.left = currFaceLen;
-            e2.left = currFaceLen;
-            e3.left = currFaceLen;
-            e4.left = currFaceLen+1;
-            e5.left = currFaceLen+1;
-            e6.left = currFaceLen+1;
-            e1.halfEdgePair = currLen+3;
-            mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].halfEdgeNext].halfEdgePair].halfEdgePair = currLen+2;
-            e3.halfEdgePair = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].halfEdgeNext].halfEdgePair;
-            e2.halfEdgePair = mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].halfEdgeNext;
-            mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgeNext].halfEdgeNext].halfEdgePair = currLen+1;
-            e4.halfEdgePair = currLen;
-            e5.halfEdgePair = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].halfEdgeNext].halfEdgePair;
-            mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].halfEdgeNext].halfEdgePair].halfEdgePair = currLen+4;
-            e6.halfEdgePair = mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].halfEdgeNext;
-            mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[halfEdgeIndex].halfEdgePair].halfEdgeNext].halfEdgePair = currLen+5;
-            v1.halfEdge = currLen+2;
-            v2.halfEdge = currLen;
-            v3.halfEdge = currLen+1;
-            v4.halfEdge = currLen+5;
-            v5.halfEdge = currLen+3;
-            v6.halfEdge = currLen+4;
+
+            v1.index = currLen; v2.index = currLen+1; v3.index = currLen+2; v4.index = currLen+3; v5.index = currLen+4; v6.index = currLen+5;
+            e1.index = currLen; e2.index = currLen+1; e3.index = currLen+2; e4.index = currLen+3; e5.index = currLen+4; e6.index = currLen+5;
+            f1.index = currFaceLen; f2.index = currFaceLen+1; f1.halfEdge = e1.index; f2.halfEdge = e4.index;
+            
+            e1.head = v1.index; e2.head = v2.index; e3.head = v9; e4.head = v4.index; e5.head = v6.index; e6.head = v11;
+            
+            e1.halfEdgeNext = e2.index; e2.halfEdgeNext = e9; e3.halfEdgeNext = e7;
+            e4.halfEdgeNext = e11; e5.halfEdgeNext = e4.index; e6.halfEdgeNext = e12;
+
+            e1.left = f1.index; e2.left = f1.index; e3.left = f3; e4.left = f2.index; e5.left = f2.index; e6.left = f4;
+
+            e1.halfEdgePair = e4.index; e4.halfEdgePair = e1.index; e2.halfEdgePair = e3.index;
+            e3.halfEdgePair = e2.index; e5.halfEdgePair = e6.index; e6.halfEdgePair = e5.index;
+            
+            v1.halfEdge = e1.index; v2.halfEdge = e2.index; v3.halfEdge = e9;
+            v4.halfEdge = e4.index; v5.halfEdge = e11; v6.halfEdge = e5.index;
+
+            mesh->halfEdges[e9].halfEdgeNext = e1.index;
+            mesh->halfEdges[e9].head = v3.index;
+            mesh->halfEdges[e9].left = f1.index;
+            
+            mesh->halfEdges[e11].halfEdgeNext = e5.index;
+            mesh->halfEdges[e11].head = v5.index;
+            mesh->halfEdges[e11].left = f2.index;
+
+            mesh->vertices[v9].halfEdge = e3.index;
+            mesh->vertices[v11].halfEdge = e6.index;
+
+            mesh->faces[f3].halfEdge = e7;
+            mesh->faces[f4].halfEdge = e10;
+
+            mesh->halfEdges[e8].halfEdgeNext = e3.index;
+            mesh->halfEdges[e10].halfEdgeNext = e6.index;
+
+
             mesh->vertices.push_back(v1);
             mesh->vertices.push_back(v2);
             mesh->vertices.push_back(v3);
             mesh->vertices.push_back(v4);
             mesh->vertices.push_back(v5);
             mesh->vertices.push_back(v6);
+
             mesh->halfEdges.push_back(e1);
             mesh->halfEdges.push_back(e2);
             mesh->halfEdges.push_back(e3);
@@ -1032,10 +1042,9 @@ namespace COL781 {
         }
 
 
-        // part 2.3
-        
+        // part 2.3 Remeshing
         void Mesh::loopSubdivisionStep(Mesh* mesh){
-            std::map<int, std::pair<std::pair<int, int>,std::pair<int, int>>> edgeMap;
+            std::map<int, std::pair<int,int>> edgeMap;
             std::vector<Vertex> newVertices;
             std::vector<int> oldVertices;
             std::vector<HalfEdge> newEdges;
@@ -1043,17 +1052,17 @@ namespace COL781 {
 
             //Splitting to create new vertices
             for(auto face:mesh->faces){
-                HalfEdge e1 = mesh->halfEdges[face.halfEdge];
-                HalfEdge e2 = mesh->halfEdges[e1.halfEdgeNext];
-                HalfEdge e3 = mesh->halfEdges[e2.halfEdgeNext];
+                int e1 = face.halfEdge;
+                int e2 = mesh->halfEdges[e1].halfEdgeNext;
+                int e3 = mesh->halfEdges[e2].halfEdgeNext;
                 
-                Vertex v1 = mesh->vertices[e1.head];
-                Vertex v2 = mesh->vertices[e2.head];
-                Vertex v3 = mesh->vertices[e3.head];
+                int v1 = mesh->halfEdges[e1].head;
+                int v2 = mesh->halfEdges[e2].head;
+                int v3 = mesh->halfEdges[e3].head;
 
-                glm::vec3 newPos1 = (v1.position+v2.position);
-                glm::vec3 newPos2 = (v2.position+v3.position);
-                glm::vec3 newPos3 = (v3.position+v1.position);
+                glm::vec3 newPos1 = (mesh->vertices[v1].position+mesh->vertices[v2].position);
+                glm::vec3 newPos2 = (mesh->vertices[v2].position+mesh->vertices[v3].position);
+                glm::vec3 newPos3 = (mesh->vertices[v3].position+mesh->vertices[v1].position);
                 newPos1/=2.0;newPos2/=2.0;newPos3/=2.0;
 
                 Vertex v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15;
@@ -1063,7 +1072,7 @@ namespace COL781 {
                 v4.position = v9.position = v14.position = newPos3;
                 v6.position = v7.position = v11.position = newPos1;
                 v8.position = v10.position = v15.position = newPos2;
-                v5.position = v1.position; v12.position = v2.position; v13.position = v3.position;
+                v5.position = mesh->vertices[v1].position; v12.position = mesh->vertices[v2].position; v13.position = mesh->vertices[v3].position;
                 
                 int start_index = newEdges.size();
 
@@ -1095,70 +1104,13 @@ namespace COL781 {
                 e4.left = f1.index; e5.left = f1.index; e6.left = f1.index; e7.left = f2.index; e8.left = f2.index; e9.left = f2.index;
                 e10.left = f3.index; e11.left = f3.index; e12.left = f3.index; e13.left = f4.index; e14.left = f4.index; e15.left = f4.index;
 
-                e4.halfEdgePair = e7.index; e7.halfEdgePair = e4.index; 
+                e7.halfEdgePair = e4.index; e4.halfEdgePair = e7.index;
                 e8.halfEdgePair = e11.index; e11.halfEdgePair = e8.index;
                 e9.halfEdgePair = e15.index; e15.halfEdgePair = e9.index;
 
-
-                if(edgeMap.find(e1.halfEdgePair)!=edgeMap.end()){
-                    std::pair<int,int> pair1 = edgeMap[e1.halfEdgePair].first;
-                    std::pair<int,int> pair2 = edgeMap[e1.halfEdgePair].second;
-                    if(pair1.first == v1.index){
-                        e5.halfEdgePair = pair1.second;
-                        newEdges[pair1.second].halfEdgePair = e5.index;
-                        e14.halfEdgePair = pair2.second;
-                        newEdges[pair2.second].halfEdgePair = e14.index;
-                    }
-                    else{
-                        e5.halfEdgePair = pair2.second;
-                        newEdges[pair2.second].halfEdgePair = e5.index;
-                        e14.halfEdgePair = pair1.second;
-                        newEdges[pair1.second].halfEdgePair = e14.index;
-                    }
-                }
-                else{
-                    edgeMap[e1.index] = {{v1.index,e5.index},{v3.index,e14.index}};
-                }
-
-                if(edgeMap.find(e2.halfEdgePair)!=edgeMap.end()){
-                    std::pair<int,int> pair1 = edgeMap[e2.halfEdgePair].first;
-                    std::pair<int,int> pair2 = edgeMap[e2.halfEdgePair].second;
-                    if(pair1.first == v1.index){
-                        e6.halfEdgePair = pair1.second;
-                        newEdges[pair1.second].halfEdgePair = e6.index;
-                        e12.halfEdgePair = pair2.second;
-                        newEdges[pair2.second].halfEdgePair = e12.index;
-                    }
-                    else{
-                        e6.halfEdgePair = pair2.second;
-                        newEdges[pair2.second].halfEdgePair = e6.index;
-                        e12.halfEdgePair = pair1.second;
-                        newEdges[pair1.second].halfEdgePair = e12.index;
-                    }
-                }
-                else{
-                    edgeMap[e2.index] = {{v1.index,e6.index},{v2.index,e12.index}};
-                }
-
-                if(edgeMap.find(e3.halfEdgePair)!=edgeMap.end()){
-                    std::pair<int,int> pair1 = edgeMap[e3.halfEdgePair].first;
-                    std::pair<int,int> pair2 = edgeMap[e3.halfEdgePair].second;
-                    if(pair1.first == v2.index){
-                        e10.halfEdgePair = pair1.second;
-                        newEdges[pair1.second].halfEdgePair = e10.index;
-                        e13.halfEdgePair = pair2.second;
-                        newEdges[pair2.second].halfEdgePair = e13.index;
-                    }
-                    else{
-                        e10.halfEdgePair = pair2.second;
-                        newEdges[pair2.second].halfEdgePair = e10.index;
-                        e13.halfEdgePair = pair1.second;
-                        newEdges[pair1.second].halfEdgePair = e13.index;
-                    }
-                }
-                else{
-                    edgeMap[e3.index] = {{v2.index,e10.index},{v3.index,e13.index}};
-                }
+                edgeMap[e1] = {e5.index, e14.index};
+                edgeMap[e2] = {e6.index, e12.index};
+                edgeMap[e3] = {e10.index, e13.index};
 
                 newVertices.push_back(v4); newVertices.push_back(v5); newVertices.push_back(v6); newVertices.push_back(v7); newVertices.push_back(v8); newVertices.push_back(v9);
                 newVertices.push_back(v10); newVertices.push_back(v11); newVertices.push_back(v12); newVertices.push_back(v13); newVertices.push_back(v14); newVertices.push_back(v15);
@@ -1168,39 +1120,56 @@ namespace COL781 {
                 newFaces.push_back(f1); newFaces.push_back(f2); newFaces.push_back(f3); newFaces.push_back(f4);
             }
 
+            for(int i =0; i<mesh->halfEdges.size(); i++){
+                if(mesh->halfEdges[i].halfEdgePair!=-1){
+                    int pair = mesh->halfEdges[i].halfEdgePair;
+                    int e1 = edgeMap[i].first;
+                    int e2 = edgeMap[i].second;
+                    int e3 = edgeMap[pair].first;
+                    int e4 = edgeMap[pair].second;
+
+                    glm::vec3 a1 = newVertices[newEdges[e1].head].position;
+                    glm::vec3 a2 = newVertices[newEdges[newEdges[newEdges[e1].halfEdgeNext].halfEdgeNext].head].position;
+                    glm::vec3 b1 = newVertices[newEdges[e3].head].position;
+                    glm::vec3 b2 = newVertices[newEdges[newEdges[newEdges[e3].halfEdgeNext].halfEdgeNext].head].position;
+                    if (a1==b2 && a2==b1){
+                        newEdges[e3].halfEdgePair = e1;
+                        newEdges[e1].halfEdgePair = e3;
+                        newEdges[e4].halfEdgePair = e2;
+                        newEdges[e2].halfEdgePair = e4;
+                    }
+                    else{
+                        newEdges[e3].halfEdgePair = e2;
+                        newEdges[e2].halfEdgePair = e3;
+                        newEdges[e4].halfEdgePair = e1;
+                        newEdges[e1].halfEdgePair = e4;
+                    }
+                }
+            }
             mesh->vertices = newVertices;
             mesh->halfEdges = newEdges;
             mesh->faces = newFaces;
 
             // Updating the old vertices
-            
             std::vector<glm::vec3> newPositions;
-            std::cout<<newFaces.size()<<"\n";
             for(auto vertex:oldVertices){
                 glm::vec3 newPos = glm::vec3(0.0,0.0,0.0);
                 int count = 0;
                 HalfEdge he = mesh->halfEdges[mesh->vertices[vertex].halfEdge];
-                // std::cout<<mesh->vertices[vertex].position.x<<" "<<mesh->vertices[vertex].position.y<<" "<<mesh->vertices[vertex].position.z<<"\n";
+                
                 bool f =0;
-                do {
-                    HalfEdge nextEdge = mesh->halfEdges[he.halfEdgeNext];
-                    newPos+=mesh->vertices[nextEdge.head].position;
-                    Vertex Head = mesh->vertices[nextEdge.head];
+                do {     
+                    newPos+=mesh->vertices[mesh->halfEdges[he.halfEdgeNext].head].position;
                     count++;
-                    if(vertex == 1){
-                    //     std::cout<<he.head<<std::endl;
-                    // std::cout<<Head.index<<" "<<Head.position.x<<" "<<Head.position.y<<" "<<Head.position.z<<"\n";
-                    }
-                    if(nextEdge.halfEdgePair==-1){
+                    if(mesh->halfEdges[he.halfEdgeNext].halfEdgePair==-1){
                         f = 1;
                         break;
                     }
-                    he = mesh->halfEdges[nextEdge.halfEdgePair];
+                    he = mesh->halfEdges[mesh->halfEdges[he.halfEdgeNext].halfEdgePair];
                 }
                 while (he.index != mesh->halfEdges[mesh->vertices[vertex].halfEdge].index);
 
                 if(f){
-                    // std::cout<<"Ye"<<std::endl;
                     he = mesh->halfEdges[mesh->vertices[vertex].halfEdge];
                     while(he.halfEdgePair!=-1){
                         HalfEdge pairEdge = mesh->halfEdges[he.halfEdgePair];
@@ -1227,20 +1196,14 @@ namespace COL781 {
                     a = (x*x)/32.0f - 0.25f;
                     b = (1-a)/count;
                 }
-
-                // std::cout<<mesh->vertices[vertex].position.x<<" "<<mesh->vertices[vertex].position.y<<" "<<mesh->vertices[vertex].position.z<<"\n";
-                // std::cout<<count<<" "<<a<<" "<<b<<"\n";
                 newPos*=b;
-                newPos+=mesh->vertices[vertex].position*a;
-                // mesh->vertices[vertex].position = newPos;
-                // std::cout<<newPos.x<<" "<<newPos.y<<" "<<newPos.z<<"\n";
+                newPos+=(a*mesh->vertices[vertex].position);
                 newPositions.push_back(newPos);
             }
 
             for(int i=0;i<oldVertices.size();i++){
                 mesh->vertices[oldVertices[i]].position = newPositions[i];
             }
-
         }
 
         void Mesh::loopSubdivision(Mesh* mesh, int numSteps){

@@ -22,20 +22,18 @@ int main() {
     };
 
     V::Viewer v;
-    int rows = 1, columns = 1;
+    int rows = 5, columns = 5;
     V::Mesh mesh;
     // mesh = *mesh.createSquare(rows, columns);
-    // mesh = *mesh.createSphere(4,2);
-    std::string filePath = "../meshes/bunny-1k.obj";
+    // mesh = *mesh.createSphere(10,10);
+    std::string filePath = "../meshes/teapot.obj";
     mesh = mesh.loadMesh(filePath);
     if (!v.initialize("Mesh viewer", 640, 480)) {
         return EXIT_FAILURE;
     }
     
-    // mesh.loopSubdivision(&mesh, 1);
-   
-    // mesh.flipEdge(&mesh, 119);
-    // mesh.collapseEdge(&mesh, 45);
+    mesh.loopSubdivision(&mesh, 2);
+    
     mesh.createScene(&v);
     v.view();
     return 0;
