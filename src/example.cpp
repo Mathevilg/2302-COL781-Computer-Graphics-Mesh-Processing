@@ -26,13 +26,13 @@ int main() {
     V::Mesh mesh;
     // mesh = *mesh.createSquare(rows, columns);
     // mesh = *mesh.createSphere(10,10);
-    std::string filePath = "../meshes/teapot.obj";
+    std::string filePath = "../meshes/cube.obj";
     mesh = mesh.loadMesh(filePath);
     if (!v.initialize("Mesh viewer", 640, 480)) {
         return EXIT_FAILURE;
     }
     
-    mesh.loopSubdivision(&mesh, 2);
+    mesh.loopSubdivision(&mesh, 5);
     
     mesh.createScene(&v);
     v.view();

@@ -175,7 +175,6 @@ namespace COL781 {
             bool f =0;
             do {
                 count++;
-                // std::cout<<vertices[he.head].position.x<<" "<<vertices[he.head].position.y<<" "<<vertices[he.head].position.z<<"\n";
                 if(halfEdges[he.halfEdgeNext].halfEdgePair==-1){
                     f = 1;
                     break;
@@ -193,7 +192,6 @@ namespace COL781 {
                 }
                 count++;
             }
-            // std::cout<<count<<std::endl;
         }
 
         void Mesh::createScene(Viewer* viewer){   
@@ -548,7 +546,6 @@ namespace COL781 {
             for(auto face : mesh->faces){
                 auto edge = mesh->halfEdges[face.halfEdge];
                 triangles.push_back(glm::ivec3(edge.head, mesh->halfEdges[edge.halfEdgeNext].head, mesh->halfEdges[mesh->halfEdges[edge.halfEdgeNext].halfEdgeNext].head));
-                // std::cout << edge.head << " " << mesh->halfEdges[edge.halfEdgeNext].head << " " << mesh->halfEdges[mesh->halfEdges[edge.halfEdgeNext].halfEdgeNext].head << "\n";
             }
             return triangles;
         }
@@ -589,7 +586,7 @@ namespace COL781 {
                     std::string ii,jj,kk;
                     iss >> ii >> jj >> kk;
 
-                    std::cout << "here!!!\n";
+                    // std::cout << "here!!!\n";
                     if (ii.find("//") != std::string::npos){
                         i = std::stoi(ii.substr(0,ii.find("//"))); j = std::stoi(jj.substr(0,jj.find("//"))); k = std::stoi(kk.substr(0,kk.find("//"))); 
                         std::cout << i << " " << j << " " << k << "\n";
@@ -651,7 +648,7 @@ namespace COL781 {
                 }
                 // assuming that the object file contains vn first followed by v.
                 else if (type =="vn"){
-                    std::cout << "vn\n";
+                    // std::cout << "vn\n";
                     Vertex v;
                     // float x,y,z;
                     iss >> x >> y >> z;
@@ -665,7 +662,7 @@ namespace COL781 {
 
                 else if (type == "v"){
                     // float x,y,z;
-                    std::cout << "v\n";
+                    // std::cout << "v\n";
                     // if (normalCount==0){
                         // Vertex v;
                         // // float x,y,z;
@@ -698,7 +695,7 @@ namespace COL781 {
                     glm::vec3 b1 = mesh.vertices[mesh.halfEdges[j].head].position;
                     glm::vec3 b2 = mesh.vertices[mesh.halfEdges[mesh.halfEdges[mesh.halfEdges[j].halfEdgeNext].halfEdgeNext].head].position;
                     if (a1==b2 && a2==b1){
-                        std::cout << "Match!!" << a1.y << a1.z << a2.y << a2.z << "\n";
+                        // std::cout << "Match!!" << a1.y << a1.z << a2.y << a2.z << "\n";
                         mesh.halfEdges[i].halfEdgePair = j;
                         mesh.halfEdges[j].halfEdgePair = i;
                     }
@@ -1120,8 +1117,9 @@ namespace COL781 {
                 newFaces.push_back(f1); newFaces.push_back(f2); newFaces.push_back(f3); newFaces.push_back(f4);
             }
 
+            std::pair<int,int> emptyPair = {-1,-1};
             for(int i =0; i<mesh->halfEdges.size(); i++){
-                if(mesh->halfEdges[i].halfEdgePair!=-1){
+                if(mesh->halfEdges[i].halfEdgePair!=-1 && edgeMap[i] != emptyPair){
                     int pair = mesh->halfEdges[i].halfEdgePair;
                     int e1 = edgeMap[i].first;
                     int e2 = edgeMap[i].second;
@@ -1144,6 +1142,7 @@ namespace COL781 {
                         newEdges[e4].halfEdgePair = e1;
                         newEdges[e1].halfEdgePair = e4;
                     }
+                    edgeMap[pair] = emptyPair;
                 }
             }
             mesh->vertices = newVertices;
@@ -1192,9 +1191,8 @@ namespace COL781 {
                     b = 3.0/16.0;
                 }
                 else{
-                    float x = (3.0+2.0*cos(glm::two_pi<float>()/count));
-                    a = (x*x)/32.0f - 0.25f;
-                    b = (1-a)/count;
+                    a = 5.0/8.0;
+                    b = 3.0/(8.0*count);
                 }
                 newPos*=b;
                 newPos+=(a*mesh->vertices[vertex].position);
