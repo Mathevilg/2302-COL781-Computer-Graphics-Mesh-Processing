@@ -589,32 +589,42 @@ namespace COL781 {
                     // std::cout << "here!!!\n";
                     if (ii.find("//") != std::string::npos){
                         i = std::stoi(ii.substr(0,ii.find("//"))); j = std::stoi(jj.substr(0,jj.find("//"))); k = std::stoi(kk.substr(0,kk.find("//"))); 
-                        std::cout << i << " " << j << " " << k << "\n";
+                        // std::cout << i << " " << j << " " << k << "\n";
                     }
                     else {i = std::stoi(ii); j = std::stoi(jj); k = std::stoi(kk);}
                     v1.position = mesh.positions[i-1];
                     v2.position = mesh.positions[j-1];
                     v3.position = mesh.positions[k-1];
+                    
                     if (normalsPresent){
                         v1.normal = mesh.vertexNormals[i-1];
                         v2.normal = mesh.vertexNormals[j-1];
                         v3.normal = mesh.vertexNormals[k-1];
                     }
                         
-                    // if (edgeMap.find(std::pair<int,int>(std::min(j,i), std::max(j,i))) == edgeMap.end()) edgeMap[std::pair<int,int>(std::min(j,i), std::max(j,i))] = e1.index;
-                    //     else { // if found 
-                    //         (mesh.halfEdges)[edgeMap[std::pair<int,int>(std::min(j,i), std::max(j,i))]].halfEdgePair = e1.index;
-                    //         e1.halfEdgePair = (mesh.halfEdges)[edgeMap[std::pair<int,int>(std::min(j,i), std::max(j,i))]].index;}
+                    if (edgeMap.find(std::pair<int,int>(std::min(j,i), std::max(j,i))) == edgeMap.end()){
+                        edgeMap[std::pair<int,int>(std::min(j,i), std::max(j,i))] = e2.index;
+                    }
+                    else { // if found 
+                        mesh.halfEdges[edgeMap[std::pair<int,int>(std::min(j,i), std::max(j,i))]].halfEdgePair = e2.index;
+                        e2.halfEdgePair = mesh.halfEdges[edgeMap[std::pair<int,int>(std::min(j,i), std::max(j,i))]].index;
+                    }
 
-                    // if (edgeMap.find(std::pair<int,int>(std::min(j,k), std::max(j,k))) == edgeMap.end()) edgeMap[std::pair<int,int>(std::min(j,k), std::max(j,k))] = e1.index;
-                    //     else { // if found 
-                    //         (mesh.halfEdges)[edgeMap[std::pair<int,int>(std::min(j,k), std::max(j,k))]].halfEdgePair = e1.index;
-                    //         e1.halfEdgePair = (mesh.halfEdges)[edgeMap[std::pair<int,int>(std::min(j,k), std::max(j,k))]].index;}
+                    if (edgeMap.find(std::pair<int,int>(std::min(j,k), std::max(j,k))) == edgeMap.end()) {
+                        edgeMap[std::pair<int,int>(std::min(j,k), std::max(j,k))] = e3.index;
+                    }
+                    else { // if found 
+                        mesh.halfEdges[edgeMap[std::pair<int,int>(std::min(j,k), std::max(j,k))]].halfEdgePair = e3.index;
+                        e3.halfEdgePair = mesh.halfEdges[edgeMap[std::pair<int,int>(std::min(j,k), std::max(j,k))]].index;
+                    }
 
-                    // if (edgeMap.find(std::pair<int,int>(std::min(k,i), std::max(k,i))) == edgeMap.end()) edgeMap[std::pair<int,int>(std::min(i,k), std::max(i,k))] = e1.index;
-                    //     else { // if found 
-                    //         (mesh.halfEdges)[edgeMap[std::pair<int,int>(std::min(i,k), std::max(i,k))]].halfEdgePair = e1.index;
-                    //         e1.halfEdgePair = (mesh.halfEdges)[edgeMap[std::pair<int,int>(std::min(i,k), std::max(i,k))]].index;}
+                    if (edgeMap.find(std::pair<int,int>(std::min(k,i), std::max(k,i))) == edgeMap.end()) {
+                        edgeMap[std::pair<int,int>(std::min(i,k), std::max(i,k))] = e1.index;
+                    }
+                    else { // if found 
+                        mesh.halfEdges[edgeMap[std::pair<int,int>(std::min(i,k), std::max(i,k))]].halfEdgePair = e1.index;
+                        e1.halfEdgePair = mesh.halfEdges[edgeMap[std::pair<int,int>(std::min(i,k), std::max(i,k))]].index;
+                    }
 
                     f.halfEdge = v1.index;
 
@@ -688,20 +698,20 @@ namespace COL781 {
             // }
 
             // Now traverse the edges once agan to set the pairs
-            for (int i=0; i<mesh.halfEdges.size(); i++) {
-                for (int j=i+1; j<mesh.halfEdges.size(); j++) {
-                    glm::vec3 a1 = mesh.vertices[mesh.halfEdges[i].head].position;
-                    glm::vec3 a2 = mesh.vertices[mesh.halfEdges[mesh.halfEdges[mesh.halfEdges[i].halfEdgeNext].halfEdgeNext].head].position;
-                    glm::vec3 b1 = mesh.vertices[mesh.halfEdges[j].head].position;
-                    glm::vec3 b2 = mesh.vertices[mesh.halfEdges[mesh.halfEdges[mesh.halfEdges[j].halfEdgeNext].halfEdgeNext].head].position;
-                    if (a1==b2 && a2==b1){
-                        // std::cout << "Match!!" << a1.y << a1.z << a2.y << a2.z << "\n";
-                        mesh.halfEdges[i].halfEdgePair = j;
-                        mesh.halfEdges[j].halfEdgePair = i;
-                    }
+            // for (int i=0; i<mesh.halfEdges.size(); i++) {
+            //     for (int j=i+1; j<mesh.halfEdges.size(); j++) {
+            //         glm::vec3 a1 = mesh.vertices[mesh.halfEdges[i].head].position;
+            //         glm::vec3 a2 = mesh.vertices[mesh.halfEdges[mesh.halfEdges[mesh.halfEdges[i].halfEdgeNext].halfEdgeNext].head].position;
+            //         glm::vec3 b1 = mesh.vertices[mesh.halfEdges[j].head].position;
+            //         glm::vec3 b2 = mesh.vertices[mesh.halfEdges[mesh.halfEdges[mesh.halfEdges[j].halfEdgeNext].halfEdgeNext].head].position;
+            //         if (a1==b2 && a2==b1){
+            //             // std::cout << "Match!!" << a1.y << a1.z << a2.y << a2.z << "\n";
+            //             mesh.halfEdges[i].halfEdgePair = j;
+            //             mesh.halfEdges[j].halfEdgePair = i;
+            //         }
                     
-                }
-            }
+            //     }
+            // }
 
             // // now traverse once again for boundary meshes
             // for (int i=0; i<(mesh.vertices).size(); i++){
