@@ -737,10 +737,10 @@ namespace COL781 {
                 do {
                     if (mesh->halfEdges[mesh->vertices[start].halfEdge].halfEdgePair == -1) break;
                     start = mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->halfEdges[mesh->vertices[start].halfEdge].halfEdgePair].halfEdgeNext].halfEdgeNext].head;
-                    std::cout << start << "\n";
+                    // std::cout << start << "\n";
                     // count++;
                 } while (start!=i);
-                std::cout << "\n\n";
+                // std::cout << "\n\n";
 
                 int he = (mesh->vertices[start]).halfEdge;
                 std::vector<float> areas;
@@ -804,44 +804,8 @@ namespace COL781 {
 
         void Mesh::taubinSmoothing(Mesh* mesh, float lambda, float mu, int iter){
             for (int iterations=0; iterations<iter; iterations++){
-                Mesh newMesh = *mesh;
-                for (int i=0; i<(newMesh.vertices).size(); i++){
-                    int he = (newMesh.vertices[i]).halfEdge;
-                    glm::vec3 sumNeighbours = glm::vec3(0.0,0.0,0.0);
-                    int neighbours=0;
-                    do {
-                    // do something with h->head;
-                        glm::vec3 v1 = newMesh.vertices[newMesh.halfEdges[he].head].position;
-                        glm::vec3 v2 = newMesh.vertices[newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].head].position;
-                        glm::vec3 v3 = newMesh.vertices[newMesh.halfEdges[newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].halfEdgeNext].head].position;
-                        sumNeighbours += v2;
-                        sumNeighbours += v3;
-                        he = newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].halfEdgePair;  // h = h->next->pair;
-                        neighbours++;
-                    } while (he != (newMesh.vertices[i]).halfEdge);
-                    sumNeighbours /= (2.0*neighbours);
-                    glm::vec3 delta = sumNeighbours - newMesh.vertices[newMesh.halfEdges[he].head].position;
-                    mesh->vertices[mesh->halfEdges[he].head].position += lambda*delta;
-                }
-                newMesh = *mesh;
-                for (int i=0; i<(newMesh.vertices).size(); i++){
-                    int he = (newMesh.vertices[i]).halfEdge;
-                    glm::vec3 sumNeighbours = glm::vec3(0.0,0.0,0.0);
-                    int neighbours=0;
-                    do {
-                    // do something with h->head;
-                        glm::vec3 v1 = newMesh.vertices[newMesh.halfEdges[he].head].position;
-                        glm::vec3 v2 = newMesh.vertices[newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].head].position;
-                        glm::vec3 v3 = newMesh.vertices[newMesh.halfEdges[newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].halfEdgeNext].head].position;
-                        sumNeighbours += v2;
-                        sumNeighbours += v3;
-                        he = newMesh.halfEdges[newMesh.halfEdges[he].halfEdgeNext].halfEdgePair;  // h = h->next->pair;
-                        neighbours++;
-                    } while (he != (newMesh.vertices[i]).halfEdge);
-                    sumNeighbours /= (2.0*neighbours);
-                    glm::vec3 delta = sumNeighbours - newMesh.vertices[newMesh.halfEdges[he].head].position;
-                    mesh->vertices[mesh->halfEdges[he].head].position += lambda*mu;
-                }
+                naiveSmoothing(mesh, lambda, 1);
+                naiveSmoothing(mesh, mu, 1);
             }
         }
 
@@ -954,7 +918,7 @@ namespace COL781 {
             mesh->halfEdges.push_back(e6);
             mesh->faces.push_back(f1);
             mesh->faces.push_back(f2);
-            std::cout<<mesh->halfEdges.size()<< " " <<mesh->vertices.size()<<"\n";
+            // std::cout<<mesh->halfEdges.size()<< " " <<mesh->vertices.size()<<"\n";
         }
         void Mesh::collapseEdge(Mesh* mesh, int halfEdgeIndex){
             glm::vec3 pos1 = mesh->vertices[mesh->halfEdges[halfEdgeIndex].head].position;
